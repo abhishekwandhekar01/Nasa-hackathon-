@@ -1,0 +1,15 @@
+<%- include('partials/header', { user: user, active: 'missions' }) %>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="feature-card text-center">
+                <h2 class="display-6">Quiz Results</h2>
+                <p class="lead">You answered <strong><%= totalCorrect %></strong> out of <strong><%= totalQuestions %></strong> correctly.</p>
+                <a href="/dashboard" class="btn btn-primary">Return to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

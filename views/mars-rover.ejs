@@ -1,32 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mars Rover Photos</title>
-    <style>
-        body { font-family: sans-serif; max-width: 1200px; margin: auto; padding: 20px; }
-        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .photo-card { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
-        .photo-card img { width: 100%; height: auto; display: block; }
-        .photo-info { padding: 10px; }
-        .photo-info p { margin: 5px 0; font-size: 0.9em; }
-    </style>
-</head>
-<body>
-    <h1>Latest Photos from the Curiosity Rover</h1>
-    <p><a href="/dashboard">Back to Dashboard</a></p>
+<%- include('partials/header', { user: user }) %>
 
-    <div class="gallery">
+<div class="container">
+    <div class="text-center mb-5">
+        <h1 class="display-5">Latest Photos from Mars</h1>
+        <p class="lead text-muted">Images sent back from the Curiosity Rover.</p>
+    </div>
+
+    <div class="features-grid">
         <% photos.forEach(photo => { %>
-            <div class="photo-card">
-                <img src="<%= photo.img_src %>" alt="Photo from Mars">
-                <div class="photo-info">
-                    <p><strong>Camera:</strong> <%= photo.camera.full_name %></p>
-                    <p><strong>Date:</strong> <%= photo.earth_date %></p>
+            <div class="feature-card p-0 overflow-hidden"> <img src="<%= photo.img_src %>" alt="Photo from Mars" class="img-fluid">
+                <div class="p-3 text-start">
+                    <p class="mb-0"><strong>Camera:</strong> <%= photo.camera.full_name %></p>
+                    <p class="text-muted mb-0"><strong>Date:</strong> <%= photo.earth_date %></p>
                 </div>
             </div>
         <% }) %>
     </div>
-</body>
-</html>
+</div>
+
+<%- include('partials/footer') %>

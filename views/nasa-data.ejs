@@ -1,0 +1,94 @@
+<%- include('partials/header', { user: user, active: 'nasa-data' }) %>
+
+<div class="container">
+    <div class="text-center mb-4">
+        <h1 class="display-5">NASA Data Hub</h1>
+        <p class="lead text-muted">Live and historical space data pulled together in one place.</p>
+    </div>
+
+    <% if (!hasNasaKey) { %>
+        <div class="alert alert-info">No NASA API key configured. Some data (APOD, Mars photos, NEOs) will be unavailable. Add <code>NASA_API_KEY</code> in your .env.</div>
+    <% } %>
+    <div class="row g-4">
+        <!-- Card: ISS -->
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="feature-card p-3 nasa-card">
+                <h5>ISS Current Location</h5>
+                <p class="mb-2">Live telemetry for the International Space Station.</p>
+                <a href="/nasa/iss" target="_blank" class="btn btn-outline-light w-100">Open Details</a>
+                <div class="collapse mt-3" id="issDetails">
+                    <% if (issData && issData.message === 'success') { %>
+                        <p class="mb-1"><strong>Timestamp:</strong> <%= new Date(issData.timestamp * 1000).toLocaleString() %></p>
+                        <p class="mb-1"><strong>Latitude:</strong> <%= issData.iss_position.latitude %></p>
+                        <p class="mb-1"><strong>Longitude:</strong> <%= issData.iss_position.longitude %></p>
+                    <% } else { %>
+                        <p>No ISS data available.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: APOD -->
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="feature-card p-3 nasa-card">
+                <h5>Astronomy Picture of the Day</h5>
+                <p class="mb-2">Daily image from NASA with explanation.</p>
+                <a href="/nasa/apod" target="_blank" class="btn btn-outline-light w-100">Open Details</a>
+                <div class="collapse mt-3" id="apodDetails">
+                    <% if (apod) { %>
+                        <img src="<%= apod.url %>" class="img-fluid rounded mb-2" alt="APOD">
+                        <h6><%= apod.title %></h6>
+                        <p class="nasa-explain"><%= apod.explanation %></p>
+                    <% } else { %>
+                        <p>No APOD available.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: NEOs -->
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="feature-card p-3 nasa-card">
+                <h5>Near-Earth Objects</h5>
+                <p class="mb-2">Asteroids and comets approaching Earth today.</p>
+                <a href="/nasa/neos" target="_blank" class="btn btn-outline-light w-100">Open Details</a>
+                <div class="collapse mt-3" id="neoDetails">
+                    <% if (neos && neos.length) { %>
+                        <ul class="nasa-list">
+                            <% neos.forEach(n => { %>
+                                <li><strong><%= n.name %></strong> — Miss distance: <%= n.close_approach_data[0].miss_distance.kilometers %> km</li>
+                            <% }) %>
+                        </ul>
+                    <% } else { %>
+                        <p>No NEO data available.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Mars Photos -->
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="feature-card p-3 nasa-card">
+                <h5>Mars Rover Latest Photos</h5>
+                <p class="mb-2">Recent images taken by the Curiosity rover.</p>
+                <a href="/nasa/mars-photos" target="_blank" class="btn btn-outline-light w-100">Open Details</a>
+                <div class="collapse mt-3" id="marsDetails">
+                    <% if (marsPhotos && marsPhotos.length) { %>
+                        <div class="row g-2">
+                            <% marsPhotos.slice(0,6).forEach(photo => { %>
+                                <div class="col-6">
+                                    <img src="<%= photo.img_src %>" class="img-fluid rounded" alt="Mars photo">
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <p>No Mars photos available.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<%- include('partials/footer') %>

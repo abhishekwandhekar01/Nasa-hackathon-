@@ -1,6 +1,7 @@
 <!-- views/partials/header.ejs -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,35 +10,93 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-rocket"></i> Space Universe
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="/solar-system"><i class="fas fa-satellite-dish"></i> Solar System</a></li>
-                <li class="nav-item"><a class="nav-link" href="/leaderboard"><i class="fas fa-trophy"></i> Leaderboard</a></li>
-            </ul>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-rocket"></i>
+                Space Universe
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link <%= (typeof active !== 'undefined' && active === 'home') ? 'active' : '' %>" href="/"> <i class="fas fa-rocket"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= (typeof active !== 'undefined' && active === 'missions') ? 'active' : '' %>" href="/missions"> <i class="fas fa-star"></i> Missions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/nasa-data"> <i class="fas fa-satellite"></i> NASA Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ar"> <i class="fas fa-camera"></i> AR Experience</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/solar-builder"> <i class="fas fa-cog"></i> Solar Builder</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/leaderboard"> <i class="fas fa-trophy"></i> Leaderboard</a>
+                    </li>
+                    <!-- profile moved to the right dropdown -->
+                </ul>
 
-            <% if (typeof user !== 'undefined' && user) { %>
-                <div class="user-info text-white">
-                    <span class="badge-level">Level <%= user.level %></span>
-                    <span class="badge-xp"><%= user.xp %> XP</span>
-                    <a href="/auth/logout" class="btn btn-outline-light btn-sm ms-3">Logout</a>
-                </div>
-            <% } else { %>
-                <div>
-                    <a href="/auth/login" class="btn btn-outline-light me-2">Login</a>
-                    <a href="/auth/register" class="btn btn-primary">Register</a>
-                </div>
-            <% } %>
+                <% if (typeof user !=='undefined' && user) { %>
+                    <div class="d-flex align-items-center ms-auto">
+                        <div class="dropdown">
+                            <button class="btn btn-dark dropdown-toggle profile-btn" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false" data-xp="<%= user.xp %>" data-level="<%= user.level %>">
+                                <i class="fas fa-user-circle fa-lg"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="profileMenu" style="min-width:220px;">
+                                <li class="mb-2"><strong><%= user.username %></strong></li>
+                                <li>
+                                    <div class="d-flex justify-content-between"><small>Level</small><small>XP</small></div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="badge-level"> <%= user.level %> </div>
+                                        <div class="badge-xp"> <%= user.xp %> XP</div>
+                                    </div>
+                                    <div class="progress" style="height:10px;">
+                                      <div id="level-progress" class="progress-bar" role="progressbar" style="width:0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </li>
+                                <li class="mt-3 d-flex gap-2">
+                                    <a href="/dashboard" class="btn btn-outline-light btn-sm">Profile</a>
+                                    <a href="/auth/logout" class="btn btn-outline-light btn-sm ms-auto">Logout</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="d-flex align-items-center ms-auto">
+                        <a href="/auth/login" class="btn btn-outline-light me-2">Login</a>
+                        <a href="/auth/register" class="btn btn-primary">Register</a>
+                    </div>
+                <% } %>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
+            <% if (typeof user !== 'undefined' && user) { %>
+            <script>
+                // Mirror of server level thresholds - keep in sync with utils/xpManager.js
+                const LEVEL_THRESHOLDS = [0, 100, 250, 500, 1000, 2000, 3500, 5000];
+                (function(){
+                    try {
+                        const btn = document.getElementById('profileMenu');
+                        const xpVal = parseInt(btn.dataset.xp || '0', 10);
+                        const levelVal = parseInt(btn.dataset.level || '1', 10);
+                        const idx = Math.max(0, Math.min(LEVEL_THRESHOLDS.length-1, levelVal-1));
+                        const currentLevelXP = LEVEL_THRESHOLDS[idx];
+                        const nextLevelXP = LEVEL_THRESHOLDS[idx+1] || (LEVEL_THRESHOLDS[idx] + 1000);
+                        const needed = nextLevelXP - currentLevelXP;
+                        const have = xpVal - currentLevelXP;
+                        const pct = Math.max(0, Math.min(100, Math.round((have / needed) * 100)));
+                        const bar = document.getElementById('level-progress');
+                        if (bar) { bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+                    } catch(e){ console.error(e); }
+                })();
+            </script>
+            <% } %>

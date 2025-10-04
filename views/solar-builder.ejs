@@ -1,0 +1,40 @@
+<%- include('partials/header', { user: user }) %>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-4">
+      <h3>Planet Palette</h3>
+      <div id="palette" class="d-flex flex-column gap-2">
+        <% planets.forEach(function(p){ %>
+          <div class="palette-item" draggable="true" data-name="<%= p.name %>" data-img="<%= p.image %>" data-diameter="<%= p.diameter %>" data-distance="<%= p.distanceFromSun %>" data-moons="<%= p.moons %>">
+            <img src="<%= p.image %>" alt="<%= p.name %>" style="width:48px; height:48px; object-fit:cover;" />
+            <div class="ms-2">
+              <div><strong><%= p.name %></strong></div>
+              <div class="text-muted" style="font-size:0.85rem"><%= p.diameter %></div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="mt-4 d-flex gap-2 flex-wrap">
+        <button id="play-toggle" class="btn btn-outline-light">Play</button>
+        <button id="randomize" class="btn btn-outline-light">Randomize</button>
+        <button id="clear-system" class="btn btn-outline-light">Clear</button>
+        <button id="save-system" class="btn btn-primary ms-auto">Save system</button>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <h3>Your System</h3>
+      <div id="system-canvas" class="p-3 solar-canvas" style="min-height:480px; background: rgba(255,255,255,0.02); border-radius:8px; border:1px solid rgba(255,255,255,0.04); position:relative; overflow:hidden;">
+        <div class="sun" title="Central Star"></div>
+        <div id="orbits" class="orbits"></div>
+        <p class="text-muted overlay-help">Drag planets from the left palette and drop them anywhere inside the canvas to add them to orbits. Use Play to animate.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/solar-builder.js"></script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,20 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <h2>Astronomy Picture of the Day</h2>
+  <% if (!apod) { %>
+    <p>No APOD available. Ensure NASA API key is configured.</p>
+  <% } else { %>
+    <div class="card nasa-card p-3">
+      <h4 class="mb-2"><%= apod.title %></h4>
+      <% if (apod.media_type === 'image') { %>
+        <img src="<%= apod.url %>" alt="apod" class="img-fluid rounded mb-2" />
+      <% } else { %>
+        <a href="<%= apod.url %>" target="_blank">View media</a>
+      <% } %>
+      <p class="nasa-explain"><%= apod.explanation %></p>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

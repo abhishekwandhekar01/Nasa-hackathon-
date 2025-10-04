@@ -24,10 +24,15 @@ app.set('view engine', 'ejs');
 
 // --- Session Configuration ---
 app.use(session({
-    secret: 'a_secret_key_for_the_space_nerds',
+    secret: process.env.SESSION_SECRET || 'a_secret_key_for_the_space_nerds',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI })
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+    cookie: {
+        secure: process.env.NODE_ENV === 'production', // send cookie over HTTPS only in prod
+        httpOnly: true,
+        sameSite: 'lax'
+    }
 }));
 
 // --- Routes ---
@@ -58,39 +63,90 @@ app.get('/dashboard', async (req, res) => {
 
 // NEW ROUTE TO SHOW THE QUIZ
 // app.js
-
+app.get('/missions', async (req, res) => {
+    if (!req.session.userId) {
+        return res.redirect('/auth/login');
+    }
+    try {
+        const user = await User.findById(req.session.userId);
+        const missions = require('./data/missions');
+        res.render('missions', { user: user, missions });
+    } catch (error) {
+        console.error("Error loading missions page:", error);
+        res.send("Could not load missions.");
+    }
+});
 app.get('/daily-quiz', async (req, res) => {
     if (!req.session.userId) {
         return res.redirect('/auth/login');
     }
     try {
-        // 1. Fetch the logged-in user's data
-        const user = await User.findById(req.session.userId); 
-        const response = await axios.get(`https://api.nasa.gov/planetary/apod?api_key=${process.env.NASA_API_KEY}`);
-        
-        // 2. Pass BOTH the user and apod data to the view
-        res.render('quiz', { user: user, apod: response.data }); 
+        const user = await User.findById(req.session.userId);
+        // Use local custom questions rather than external APIs
+        const allQuestions = require('./data/questions');
+        // pick 2 random questions (we'll add one generated from fact)
+        const shuffled = allQuestions.slice().sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 2);
+
+    // pick a random fact and generate a knowledge paragraph + question from it
+    const facts = require('./data/facts');
+    const { generateKnowledgeAndQuestion } = require('./utils/knowledgeGen');
+    const fact = facts[Math.floor(Math.random() * facts.length)];
+    const generated = generateKnowledgeAndQuestion(fact);
+
+        // Build questions for view (exclude answers)
+        // We'll give the generated question id 'fact'
+        const questions = selected.map(q => {
+            const { id, type, prompt, options, image } = q;
+            return { id, type, prompt, options, image };
+        });
+
+    const factQuestion = { id: 'fact', type: generated.type, prompt: generated.question, options: generated.options, image: null };
+    // place fact question at the top
+    questions.unshift(factQuestion);
+
+    // Store correct answers server-side
+    req.session.dailyQuiz = [{ id: 'fact', answer: generated.answer }, ...selected.map(q => ({ id: q.id, answer: q.answer }))];
+
+    // Pass the knowledge paragraph to the view as todaysKnowledge
+    res.render('quiz', { user, questions, todaysKnowledge: generated.knowledge });
     } catch (error) {
         console.error("Error fetching quiz data:", error);
         res.send("Could not load the quiz.");
     }
 });
 
-// NEW ROUTE TO HANDLE QUIZ SUBMISSION
+// NEW ROUTE TO HANDLE QUIZ SUBMISSION (server-side answers stored in session)
 app.post('/submit-quiz', async (req, res) => {
     if (!req.session.userId) {
         return res.redirect('/auth/login');
     }
     try {
-        const { userAnswer, correctAnswer } = req.body;
+        const user = await User.findById(req.session.userId);
+        const answers = req.session.dailyQuiz || [];
 
-        // Check if the answer is correct (case-insensitive and trimmed)
-        // ... inside the route
-        if (userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()) {
-            await addXP(req.session.userId, 10); // Use the new function
+        // req.body should contain fields like q1, q2, q3
+        let totalCorrect = 0;
+        for (const a of answers) {
+            const submitted = (req.body[a.id] || '').trim();
+            if (!submitted) continue;
+            if (submitted.toLowerCase() === String(a.answer).trim().toLowerCase()) {
+                totalCorrect++;
+            }
         }
-        res.redirect('/dashboard');
-        // ...
+
+        // Award XP based on correct answers (10 XP per correct)
+        if (totalCorrect > 0) {
+            await addXP(req.session.userId, totalCorrect * 10);
+        }
+
+        // Clear stored answers to avoid resubmission
+        delete req.session.dailyQuiz;
+
+        // Re-fetch the user to reflect updated XP/level
+        const updatedUser = await User.findById(req.session.userId);
+
+        res.render('quiz-result', { user: updatedUser, totalCorrect, totalQuestions: answers.length });
     } catch (error) {
         console.error("Error submitting quiz:", error);
         res.send("Something went wrong.");
@@ -170,12 +226,10 @@ app.post('/submit-mission', async (req, res) => {
     }
     try {
         const { userAnswer, correctAnswer } = req.body;
-        // ... inside the route
         if (userAnswer === correctAnswer) {
-            await addXP(req.session.userId, 15); // Use the new function
+            await addXP(req.session.userId, 15);
         }
         res.redirect('/dashboard');
-        // ...
     } catch (error) {
         console.error("Error submitting mission:", error);
         res.send("Something went wrong with your submission.");
@@ -272,7 +326,136 @@ app.get('/solar-system', async (req, res) => {
     const user = await User.findById(req.session.userId);
     res.render('solar-system', { user: user, planets: planetsData });
 });
+// app.js (add this new route)
 
+// NEW ROUTE FOR THE NASA DATA HUB
+app.get('/nasa-data', async (req, res) => {
+    if (!req.session.userId) {
+        return res.redirect('/auth/login');
+    }
+    try {
+        const user = await User.findById(req.session.userId);
+        
+        // Fetch live ISS location from Open Notify API (no key needed)
+        let issData = null;
+        try {
+            const issResponse = await axios.get('http://api.open-notify.org/iss-now.json');
+            issData = issResponse.data;
+        } catch (e) {
+            console.warn('Could not fetch ISS data:', e.message);
+        }
+
+        // Conditionally fetch NASA data if API key is provided
+        const nasaKey = process.env.NASA_API_KEY;
+        let apod = null;
+        let neos = null;
+        let marsPhotos = null;
+        if (nasaKey) {
+            try {
+                const apodResp = await axios.get(`https://api.nasa.gov/planetary/apod?api_key=${nasaKey}`);
+                apod = apodResp.data;
+            } catch (e) {
+                console.warn('Could not fetch APOD:', e.message);
+            }
+
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const neoResp = await axios.get(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=${nasaKey}`);
+                neos = (neoResp.data && neoResp.data.near_earth_objects && neoResp.data.near_earth_objects[today]) || null;
+            } catch (e) {
+                console.warn('Could not fetch NEOs:', e.message);
+            }
+
+            try {
+                const marsResp = await axios.get(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${nasaKey}`);
+                marsPhotos = marsResp.data.latest_photos || null;
+            } catch (e) {
+                console.warn('Could not fetch Mars photos:', e.message);
+            }
+        }
+
+        res.render('nasa-data', { user: user, issData, apod, neos, marsPhotos, hasNasaKey: !!nasaKey });
+    } catch (error) {
+        console.error("Error loading NASA data page:", error);
+        res.send("Could not load data hub.");
+    }
+});
+
+// Detail pages open in new tab
+app.get('/nasa/iss', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/auth/login');
+    try {
+        const user = await User.findById(req.session.userId);
+        let issData = null;
+        try { issData = (await axios.get('http://api.open-notify.org/iss-now.json')).data; } catch(e) { }
+        res.render('nasa-iss', { user, issData });
+    } catch (e) { res.sendStatus(500); }
+});
+
+app.get('/nasa/apod', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/auth/login');
+    try {
+        const user = await User.findById(req.session.userId);
+        let apod = null;
+        if (process.env.NASA_API_KEY) {
+            try { apod = (await axios.get(`https://api.nasa.gov/planetary/apod?api_key=${process.env.NASA_API_KEY}`)).data; } catch(e) {}
+        }
+        res.render('nasa-apod', { user, apod });
+    } catch (e) { res.sendStatus(500); }
+});
+
+app.get('/nasa/neos', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/auth/login');
+    try {
+        const user = await User.findById(req.session.userId);
+        let neos = null;
+        if (process.env.NASA_API_KEY) {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const resp = await axios.get(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=${process.env.NASA_API_KEY}`);
+                neos = (resp.data && resp.data.near_earth_objects && resp.data.near_earth_objects[today]) || null;
+            } catch(e) {}
+        }
+        res.render('nasa-neos', { user, neos });
+    } catch (e) { res.sendStatus(500); }
+});
+
+app.get('/nasa/mars-photos', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/auth/login');
+    try {
+        const user = await User.findById(req.session.userId);
+        let marsPhotos = null;
+        if (process.env.NASA_API_KEY) {
+            try { marsPhotos = (await axios.get(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${process.env.NASA_API_KEY}`)).data.latest_photos; } catch(e) {}
+        }
+        res.render('nasa-mars', { user, marsPhotos });
+    } catch (e) { res.sendStatus(500); }
+});
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+// AR demo page
+app.get('/ar', async (req, res) => {
+    try {
+        const user = req.session.userId ? await User.findById(req.session.userId) : null;
+        res.render('ar', { user });
+    } catch (e) { console.error(e); res.sendStatus(500); }
+});
+
+// Solar Builder - interactive page to assemble a system
+app.get('/solar-builder', async (req, res) => {
+    try {
+        const user = req.session.userId ? await User.findById(req.session.userId) : null;
+        const planets = require('./data/planets');
+        res.render('solar-builder', { user, planets });
+    } catch (e) { console.error(e); res.sendStatus(500); }
+});
+
+app.post('/solar-builder/save', express.json(), async (req, res) => {
+    try {
+        // save the posted system to session to keep it simple
+        req.session.customSystem = req.body.system || [];
+        res.json({ ok: true });
+    } catch (e) { console.error(e); res.status(500).json({ ok: false }); }
 });

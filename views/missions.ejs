@@ -1,0 +1,50 @@
+<%- include('partials/header', { user: user }) %>
+
+<div class="container">
+    <div class="text-center mb-5">
+        <h1 class="display-5">Mission Control</h1>
+        <p class="lead text-muted">Select a mission to test your knowledge and earn XP.</p>
+    </div>
+
+    <section class="features-grid">
+        <% missions.forEach(m => { %>
+            <div class="feature-card">
+                <img src="<%= m.image %>" alt="<%= m.name %>" class="img-fluid rounded mb-3">
+                <h3 class="feature-title"><%= m.name %></h3>
+                <p class="mission-meta small mb-1"><strong>Agency:</strong> <%= m.agency %> • <strong>Launch:</strong> <%= m.launchDate %></p>
+                <p class="feature-description"><%= m.summary %></p>
+                <p><strong>Achievements:</strong></p>
+                <ul>
+                    <% m.achievements.forEach(a => { %>
+                        <li><%= a %></li>
+                    <% }) %>
+                </ul>
+                <p class="mission-funfact small"><strong>Fun Fact:</strong> <%= m.funFact %></p>
+                <a href="#" class="btn btn-outline-light mt-3">Explore Mission</a>
+            </div>
+        <% }) %>
+    </section>
+        <section class="missions-grid">
+            <% missions.forEach(m => { %>
+                <div class="feature-card mission-card">
+                    <img src="<%= m.image %>" alt="<%= m.name %>">
+                    <h3 class="feature-title mt-3"><%= m.name %></h3>
+                    <p class="mission-meta small mb-2"><strong>Agency:</strong> <%= m.agency %> • <strong>Launch:</strong> <%= m.launchDate %></p>
+                    <p class="feature-description"><%= m.summary %></p>
+                    <p><strong>Achievements:</strong></p>
+                    <ul>
+                        <% m.achievements.forEach(a => { %>
+                            <li><%= a %></li>
+                        <% }) %>
+                    </ul>
+                    <p class="mission-funfact small"><strong>Fun Fact:</strong> <%= m.funFact %></p>
+                    <div class="mission-actions">
+                        <a href="#" class="btn btn-outline-light">Explore</a>
+                        <a href="/missions/<%= m.id %>" class="btn btn-primary">Details</a>
+                    </div>
+                </div>
+            <% }) %>
+        </section>
+</div>
+
+<%- include('partials/footer') %>

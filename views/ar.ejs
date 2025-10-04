@@ -1,0 +1,93 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <h2>AR Experience</h2>
+  <p>Try viewing a Mars model in AR (works on compatible mobile devices and browsers).</p>
+
+  <!-- model-viewer from unpkg; allows WebXR & AR Quick Look fallback -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <!--
+    To enable full AR experiences:
+    - Place a GLB at /public/models/mars.glb and a USDZ at /public/models/mars.usdz for iOS Quick Look.
+    - model-viewer will use WebXR where available, Scene Viewer on Android, and Quick Look on iOS.
+  -->
+  <model-viewer id="mv" src="/models/mars.glb" ios-src="/models/mars.usdz"
+                alt="Mars model"
+                ar
+                ar-modes="webxr scene-viewer quick-look"
+                interaction-prompt="auto"
+                shadow-intensity="1"
+                environment-image="neutral"
+                camera-controls
+                poster="/img/earth.png"
+                style="width:100%; height:640px; background: transparent; border-radius:12px;">
+    <button slot="ar-button" class="cta-button">View in your space</button>
+  </model-viewer>
+
+  <div id="ar-info" class="mt-3">
+    <p id="ar-status">Detecting AR support...</p>
+    <div id="ar-links" style="display:none">
+      <a id="scene-viewer-link" class="btn btn-outline-light me-2" target="_blank">Open in Scene Viewer (Android)</a>
+      <a id="quick-look-link" class="btn btn-outline-light" target="_blank">Open in Quick Look (iOS)</a>
+    </div>
+    <p class="mt-2">If your device doesn't support AR, you can still rotate and inspect the 3D model above.</p>
+  </div>
+
+  <script>
+    (function(){
+      const status = document.getElementById('ar-status');
+      const links = document.getElementById('ar-links');
+      const svLink = document.getElementById('scene-viewer-link');
+      const qlLink = document.getElementById('quick-look-link');
+
+      // Helper to build absolute URL for asset
+      function absolute(url){
+        if (!url) return '';
+        try { return new URL(url, window.location.href).href; } catch(e){ return url; }
+      }
+
+      const glb = absolute('/models/mars.glb');
+      const usdz = absolute('/models/mars.usdz');
+
+      // Build Android Scene Viewer URL
+      const sceneViewerUrl = 'https://arvr.google.com/scene-viewer/1.0?file=' + encodeURIComponent(glb) + '&mode=ar_only';
+      svLink.href = sceneViewerUrl;
+      qlLink.href = usdz;
+
+      // Check WebXR support for immersive-ar
+      if (navigator.xr && navigator.xr.isSessionSupported) {
+        navigator.xr.isSessionSupported('immersive-ar').then(function(supported){
+          if (supported) {
+            status.textContent = 'Your device supports WebXR AR. Use the button on the model to enter AR.';
+          } else {
+            status.textContent = 'WebXR AR not available — using platform fallbacks if present.';
+            links.style.display = 'block';
+          }
+        }).catch(function(){ status.textContent = 'Unable to detect WebXR support.'; links.style.display = 'block'; });
+      } else {
+        // Fallback: show Scene Viewer / Quick Look links for mobile devices
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isAndroid = /Android/.test(navigator.userAgent);
+        if (isAndroid) {
+          status.textContent = 'Tap the Scene Viewer link to open this model in AR on Android.';
+          links.style.display = 'block';
+          svLink.style.display = 'inline-block';
+        } else if (isIOS) {
+          if (usdz) {
+            status.textContent = 'Tap the Quick Look link to view in AR on iOS.';
+            links.style.display = 'block';
+            qlLink.style.display = 'inline-block';
+          } else {
+            status.textContent = 'iOS Quick Look USDZ not available. Please add /models/mars.usdz to enable AR on iOS.';
+          }
+        } else {
+          status.textContent = 'AR not supported on this browser/device. You can still rotate and inspect the model.';
+        }
+      }
+    })();
+  </script>
+
+</div>
+
+<%- include('partials/footer') %>

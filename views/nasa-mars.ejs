@@ -1,0 +1,25 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <h2>Mars Rover Photos (Latest)</h2>
+  <% if (!marsPhotos || marsPhotos.length === 0) { %>
+    <p>No Mars photos available at the moment.</p>
+  <% } else { %>
+    <div class="row">
+      <% marsPhotos.forEach(function(photo) { %>
+        <div class="col-md-4 mb-3">
+          <div class="card nasa-card p-2">
+            <img src="<%= photo.img_src %>" class="img-fluid rounded" />
+            <div class="mt-2">
+              <p><strong>Rover:</strong> <%= photo.rover.name %></p>
+              <p><strong>Camera:</strong> <%= photo.camera.full_name %></p>
+              <p><strong>Earth Date:</strong> <%= photo.earth_date %></p>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

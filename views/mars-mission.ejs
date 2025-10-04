@@ -1,36 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mars Mission</title>
-    <style>
-        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
-        img { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 20px; }
-        .choices label { display: block; margin: 10px 0; font-size: 1.2em; }
-    </style>
-</head>
-<body>
-    <h1>Mission: Identify the Camera</h1>
-    <p>Study the image below, taken by the Curiosity Rover on Mars. Can you identify which camera captured this shot?</p>
+<%- include('partials/header', { user: user }) %>
 
-    <img src="<%= missionPhoto.img_src %>" alt="Mission photo from Mars">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="feature-card">
+                <img src="<%= missionPhoto.img_src %>" class="img-fluid rounded mb-4" alt="Mission photo from Mars">
+                <h3 class="feature-title">Mission: Identify the Camera</h3>
+                <p class="feature-description">Analyze the image from the Curiosity Rover. Can you identify which camera captured this shot?</p>
 
-    <form action="/submit-mission" method="POST">
-        <div class="choices">
-            <% choices.forEach(choice => { %>
-                <label>
-                    <input type="radio" name="userAnswer" value="<%= choice %>" required>
-                    <%= choice %>
-                </label>
-            <% }) %>
+                <form action="/submit-mission" method="POST" class="mt-4 text-start">
+                    <div class="choices">
+                        <% choices.forEach(choice => { %>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="userAnswer" id="<%= choice %>" value="<%= choice %>" required>
+                                <label class="form-check-label" for="<%= choice %>">
+                                    <%= choice %>
+                                </label>
+                            </div>
+                        <% }) %>
+                    </div>
+                    
+                    <input type="hidden" name="correctAnswer" value="<%= correctAnswer %>">
+                    <button type="submit" class="btn btn-danger w-100 mt-3">Submit Intel</button>
+                </form>
+            </div>
         </div>
-        
-        <input type="hidden" name="correctAnswer" value="<%= correctAnswer %>">
-        <button type="submit" style="margin-top: 20px; padding: 10px 20px;">Submit Intel</button>
-    </form>
+    </div>
+</div>
 
-    <p style="margin-top: 20px;"><a href="/dashboard">Return to Dashboard</a></p>
-
-</body>
-</html> 
+<%- include('partials/footer') %>

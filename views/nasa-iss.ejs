@@ -1,0 +1,17 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <h2>International Space Station (ISS) Now</h2>
+  <% if (!issData) { %>
+    <p>No live ISS data available right now.</p>
+  <% } else { %>
+    <div class="card nasa-card p-3">
+      <h4 class="mb-2">Position</h4>
+      <p><strong>Timestamp:</strong> <%= issData.timestamp %></p>
+      <p><strong>Latitude:</strong> <%= issData.iss_position.latitude %></p>
+      <p><strong>Longitude:</strong> <%= issData.iss_position.longitude %></p>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

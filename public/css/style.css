@@ -114,6 +114,57 @@ body {
     transition: transform 0.3s ease, border-color 0.3s ease;
 }
 
+.feature-card .knowledge-paragraph {
+    color: #cfe8ff; /* light cyan for visibility on dark bg */
+    text-align: left;
+}
+
+.mission-meta {
+    color: #dbeafe; /* lighter cyan */
+}
+.mission-funfact {
+    color: #bfe7d4; /* pale greenish for contrast */
+}
+
+/* Missions grid tweaks */
+.missions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.mission-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.feature-card img {
+    max-height: 180px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.feature-card ul { text-align: left; padding-left: 1rem; }
+
+.mission-actions { margin-top: 10px; display: flex; gap: 10px; justify-content: center; }
+
+/* NASA data: make lists compact */
+.nasa-list li { margin-bottom: 8px; }
+
+@media (max-width: 768px) {
+    .feature-card { padding: 20px; }
+    .missions-grid { grid-template-columns: 1fr; }
+}
+
+/* NASA data cards: ensure readable text and collapse spacing */
+.nasa-card { text-align: left; }
+.nasa-card, .nasa-card * { color: #e6f0ff !important; }
+.nasa-explain { color: #d1eaff; }
+.collapse { margin-top: 8px; }
+
 .feature-card:hover {
     transform: translateY(-5px);
     border-color: var(--secondary-color);
@@ -139,3 +190,88 @@ body {
 .feature-description {
     color: var(--text-muted);
 }
+
+/* Badge variant styles */
+.badge-ar { background: linear-gradient(90deg, #00c6ff, #0072ff); color: white; }
+.badge-nasa { background: linear-gradient(90deg, #f12711, #f5af19); color: white; }
+.badge-ai { background: linear-gradient(90deg, #8E2DE2, #4A00E0); color: white; }
+.badge-competition { background: linear-gradient(90deg, #11998e, #38ef7d); color: white; }
+
+/* Icon color variants */
+.icon-cyan { background: linear-gradient(90deg, #00c6ff, #0072ff); }
+.icon-green { background: linear-gradient(90deg, #11998e, #38ef7d); }
+.icon-purple { background: linear-gradient(90deg, #8E2DE2, #4A00E0); }
+.icon-yellow { background: linear-gradient(90deg, #f12711, #f5af19); }
+
+/* Profile dropdown and progress */
+.profile-btn { background: transparent; border: 1px solid rgba(255,255,255,0.06); color: var(--text-light); }
+.dropdown-menu { background: var(--card-bg); color: var(--text-light); border: 1px solid rgba(255,255,255,0.04); }
+.badge-level { background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); color: #fff; padding: 6px 10px; border-radius: 16px; }
+.badge-xp { background: transparent; color: var(--text-light); }
+.progress { background: rgba(255,255,255,0.03); }
+.progress-bar { background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); }
+
+@media (max-width: 768px) {
+    .hero-title { font-size: 2.2rem; }
+    .hero-section { padding: 60px 0; }
+    .user-info .badge-level, .user-info .badge-xp { padding: 6px 10px; }
+}
+
+/* Enforce dark backgrounds and light text to avoid white card backgrounds from bootstrap or other components */
+.card, .card * {
+    background-color: var(--card-bg) !important;
+    color: var(--text-light) !important;
+    border-color: rgba(255,255,255,0.06) !important;
+}
+
+.list-group-item {
+    background-color: var(--card-bg) !important;
+    color: var(--text-light) !important;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+/* Links should be clearly visible on dark backgrounds */
+a, a:link, a:visited {
+    color: #9fe0ff;
+}
+
+/* Buttons that inherit text color should remain readable */
+button, .btn {
+    color: var(--text-light) !important;
+}
+
+/* Ensure body-level forms and inputs don't default to white backgrounds */
+input, textarea, select {
+    background-color: #0b1220 !important;
+    color: var(--text-light) !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+/* NEO cards styling */
+.neo-grid { margin-top: 16px; }
+.neo-card { background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent); border-radius: 12px; border: 1px solid rgba(255,255,255,0.04); }
+.neo-thumb { display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; flex: 0 0 80px; }
+.neo-thumb.small { width: 48px; height: 48px; }
+.neo-thumb.medium { width: 80px; height: 80px; }
+.neo-thumb.large { width: 110px; height: 110px; }
+.neo-name { margin: 0 0 6px 0; }
+.neo-diameter { margin: 0; color: #cfe8ff; }
+.neo-hazard { margin: 6px 0 0 0; color: #ffd6d6; }
+.neo-actions .btn { background: transparent; border: 1px solid rgba(255,255,255,0.06); }
+
+@media (max-width: 576px) {
+    .neo-thumb.small, .neo-thumb.medium, .neo-thumb.large { width: 64px !important; height: 64px !important; }
+}
+
+/* Solar builder styles */
+.solar-canvas { min-height: 480px; position: relative; background: radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 50%); }
+.solar-canvas .sun { position: absolute; width:120px; height:120px; left:calc(50% - 60px); top:calc(50% - 60px); background: radial-gradient(circle, #ffd27a, #ff8a00); border-radius:50%; box-shadow: 0 0 30px rgba(255,140,0,0.3); }
+.orbits { position: absolute; inset:0; pointer-events:none; }
+.orbit-ring { position: absolute; border-radius:50%; border:1px dashed rgba(255,255,255,0.06); pointer-events:none; }
+.planet-on-orbit { position: absolute; pointer-events:auto; transform: translate(-50%, -50%); }
+.overlay-help { position: absolute; bottom: 8px; left: 12px; color: var(--text-muted); font-size: 0.9rem; }
+.palette-item { cursor: grab; background: rgba(255,255,255,0.02); padding:8px; border-radius:8px; display:flex; align-items:center; }
+.palette-item:active { cursor:grabbing; }
+.drag-over { outline: 2px dashed rgba(255,255,255,0.08); }
+
+.planet-info-box { position: fixed; z-index: 9999; background: rgba(10,12,20,0.95); color: var(--text-light); padding: 10px 12px; border-radius:8px; box-shadow: 0 6px 18px rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.2s ease; }

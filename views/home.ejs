@@ -1,16 +1,61 @@
-<%- include('partials/header', { user: (typeof user === 'undefined' ? null : user) }) %>
+<%- include('partials/header', { user: (typeof user === 'undefined' ? null : user), active: 'home' }) %>
 
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container">
-        <h1 class="hero-title">Space Learning <span class="highlight">Universe</span></h1>
-        <p class="hero-subtitle">We're not just making a quiz app. We're building an immersive space learning experience where students can solve missions with real NASA data and compete globally.</p>
+        <h1 class="hero-title">
+            Space Learning <span class="highlight">Universe</span>
+        </h1>
+        <p class="hero-subtitle">
+            We're not just making a quiz app. We're building an immersive space learning experience where students can explore planets in AR, solve space missions with real NASA data, and compete globally.
+        </p>
+        
         <div class="feature-badges">
-            <span class="feature-badge">Live NASA Data</span>
-            <span class="feature-badge">Interactive Missions</span>
-            <span class="feature-badge">Global Competition</span>
+            <span class="feature-badge badge-ar">AR/VR Ready</span>
+            <span class="feature-badge badge-nasa">Live NASA Data</span>
+            <span class="feature-badge badge-ai">AI-Powered</span>
+            <span class="feature-badge badge-competition">Global Competition</span>
         </div>
-        <a href="/auth/register" class="cta-button"><i class="fas fa-rocket"></i> Start Your Space Journey</a>
+
+        <a href="/auth/register" class="cta-button">
+            <i class="fas fa-rocket"></i>
+            Start Your Space Journey
+        </a>
+    </div>
+</section>
+
+<!-- Features Grid -->
+<section class="features-grid">
+    <div class="feature-card">
+        <div class="feature-icon icon-cyan">
+            <i class="fas fa-camera"></i>
+        </div>
+        <h3 class="feature-title">AR/VR Experience</h3>
+        <p class="feature-description">Explore planets and satellites in 3D augmented reality</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon icon-green">
+            <i class="fas fa-satellite"></i>
+        </div>
+        <h3 class="feature-title">Live NASA Data</h3>
+        <p class="feature-description">Real-time space data for dynamic learning experiences</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon icon-purple">
+            <i class="fas fa-cog"></i>
+        </div>
+        <h3 class="feature-title">Interactive Simulations</h3>
+        <p class="feature-description">Build solar systems and learn orbital mechanics</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon icon-yellow">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <h3 class="feature-title">Global Competition</h3>
+        <p class="feature-description">Compete with space explorers worldwide</p>
     </div>
 </section>
 
