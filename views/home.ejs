@@ -1,0 +1,17 @@
+<%- include('partials/header', { user: (typeof user === 'undefined' ? null : user) }) %>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">Space Learning <span class="highlight">Universe</span></h1>
+        <p class="hero-subtitle">We're not just making a quiz app. We're building an immersive space learning experience where students can solve missions with real NASA data and compete globally.</p>
+        <div class="feature-badges">
+            <span class="feature-badge">Live NASA Data</span>
+            <span class="feature-badge">Interactive Missions</span>
+            <span class="feature-badge">Global Competition</span>
+        </div>
+        <a href="/auth/register" class="cta-button"><i class="fas fa-rocket"></i> Start Your Space Journey</a>
+    </div>
+</section>
+
+<%- include('partials/footer') %>

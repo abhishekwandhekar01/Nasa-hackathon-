@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Rover Photos</title>
+    <style>
+        body { font-family: sans-serif; max-width: 1200px; margin: auto; padding: 20px; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .photo-card { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+        .photo-card img { width: 100%; height: auto; display: block; }
+        .photo-info { padding: 10px; }
+        .photo-info p { margin: 5px 0; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>Latest Photos from the Curiosity Rover</h1>
+    <p><a href="/dashboard">Back to Dashboard</a></p>
+
+    <div class="gallery">
+        <% photos.forEach(photo => { %>
+            <div class="photo-card">
+                <img src="<%= photo.img_src %>" alt="Photo from Mars">
+                <div class="photo-info">
+                    <p><strong>Camera:</strong> <%= photo.camera.full_name %></p>
+                    <p><strong>Date:</strong> <%= photo.earth_date %></p>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</body>
+</html>

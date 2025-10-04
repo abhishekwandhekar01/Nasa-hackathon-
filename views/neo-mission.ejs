@@ -1,0 +1,38 @@
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO Mission</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+        .choices label { display: block; margin: 10px 0; font-size: 1.2em; }
+        .intel { background-color: #f0f0f0; padding: 15px; border-radius: 8px; margin-top: 20px;}
+    </style>
+</head>
+<body>
+    <h1>Mission: Hazard Assessment</h1>
+    <p>Intel analysis is required. Of the following Near-Earth Objects approaching today, which one will have the closest flyby (smallest miss distance)?</p>
+    
+    <div class="intel">
+        <strong>Intel Tip:</strong> Use the <a href="/neo" target="_blank">NEO Tracker</a> to analyze the miss distances.
+    </div>
+
+    <form action="/submit-neo-mission" method="POST" style="margin-top: 20px;">
+        <div class="choices">
+            <% choices.forEach(choice => { %>
+                <label>
+                    <input type="radio" name="userAnswer" value="<%= choice %>" required>
+                    <%= choice %>
+                </label>
+            <% }) %>
+        </div>
+        
+        <input type="hidden" name="correctAnswer" value="<%= correctAnswer %>">
+        <button type="submit" style="margin-top: 20px; padding: 10px 20px;">Submit Assessment</button>
+    </form>
+
+    <p style="margin-top: 20px;"><a href="/dashboard">Return to Dashboard</a></p>
+
+</body>
+</html>

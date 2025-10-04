@@ -1,0 +1,31 @@
+<%- include('partials/header', { user: user }) %>
+
+<div class="container">
+    <div class="text-center mb-4">
+        <h1 class="display-5">Global Leaderboard</h1>
+        <p class="lead text-muted">Top 10 Space Explorers ranked by Level and XP.</p>
+    </div>
+
+    <table class="table table-dark table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col" class="ps-3">Rank</th>
+                <th scope="col">Username</th>
+                <th scope="col">Level</th>
+                <th scope="col">XP</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% users.forEach((user, index) => { %>
+                <tr>
+                    <th scope="row" class="ps-3">#<%= index + 1 %></th>
+                    <td><i class="fas fa-user-astronaut me-2 text-muted"></i><%= user.username %></td>
+                    <td><%= user.level %></td>
+                    <td><%= user.xp %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<%- include('partials/footer') %>

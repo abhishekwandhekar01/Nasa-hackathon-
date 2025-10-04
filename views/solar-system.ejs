@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 1200px; margin: auto; padding: 20px; }
+        /* 2. Style the container for our canvas */
+        #canvas-container { margin-bottom: 30px; border: 1px solid #ccc; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .planet-card { border: 1px solid #ccc; border-radius: 8px; text-align: center; padding: 15px; }
+        .planet-card img { width: 150px; height: 150px; object-fit: cover; }
+        .planet-card ul { list-style-type: none; padding: 0; text-align: left; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Explore Our Solar System</h1>
+    <p><a href="/dashboard">Back to Dashboard</a></p>
+
+    <div id="canvas-container"></div>
+
+    <h2>Planet Fast Facts</h2>
+    <div class="grid-container">
+        <% planets.forEach(planet => { %>
+            <div class="planet-card">
+                <h3><%= planet.name %></h3>
+                <img src="<%= planet.image %>" alt="Image of <%= planet.name %>">
+                <ul>
+                    <li><strong>Diameter:</strong> <%= planet.diameter %></li>
+                    <li><strong>Distance from Sun:</strong> <%= planet.distanceFromSun %></li>
+                    <li><strong>Moons:</strong> <%= planet.moons %></li>
+                </ul>
+            </div>
+        <% }) %>
+    </div>
+    
+    <script src="/js/sketch.js"></script>
+</body>
+</html>

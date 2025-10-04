@@ -1,0 +1,32 @@
+<%- include('partials/header', { user: user }) %>
+
+<div class="container">
+    <div class="text-center mb-5">
+        <h1 class="display-5">Welcome, <%= user.username %>!</h1>
+        <p class="lead text-muted">Select a mission or explore the cosmos.</p>
+    </div>
+
+    <!-- Features Grid -->
+    <section class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-question-circle"></i></div>
+            <h3 class="feature-title">Daily Quiz</h3>
+            <p class="feature-description">Test your knowledge with today's Astronomy Picture of the Day.</p>
+            <a href="/daily-quiz" class="btn btn-primary mt-3">Start Quiz</a>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fab fa-wpexplorer"></i></div>
+            <h3 class="feature-title">Mars Mission</h3>
+            <p class="feature-description">Identify photos from the Curiosity rover on the red planet.</p>
+            <a href="/mars-mission" class="btn btn-danger mt-3">Start Mission</a>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-meteor"></i></div>
+            <h3 class="feature-title">NEO Hazard</h3>
+            <p class="feature-description">Analyze asteroid data to find the closest approach.</p>
+            <a href="/neo-mission" class="btn btn-warning mt-3">Start Assessment</a>
+        </div>
+    </section>
+</div>
+
+<%- include('partials/footer') %>

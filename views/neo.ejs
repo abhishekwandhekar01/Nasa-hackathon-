@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO Tracker</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: auto; padding: 20px; }
+        .neo-container { display: flex; flex-direction: column; gap: 15px; }
+        .neo-card { border: 1px solid #ccc; border-radius: 8px; padding: 15px; }
+        .neo-card h3 { margin-top: 0; }
+        .neo-card p { margin: 5px 0; }
+        .hazardous { border-left: 5px solid #d9534f; } /* Red border for hazardous */
+        .safe { border-left: 5px solid #5cb85c; } /* Green border for non-hazardous */
+    </style>
+</head>
+<body>
+    <h1>Near-Earth Object Tracker</h1>
+    <p>Asteroids making a close approach to Earth on <strong><%= date %></strong>.</p>
+    <p><a href="/dashboard">Back to Dashboard</a></p>
+
+    <div class="neo-container">
+        <% neos.forEach(neo => { %>
+            <div class="neo-card <%= neo.is_potentially_hazardous_asteroid ? 'hazardous' : 'safe' %>">
+                <h3><%= neo.name %></h3>
+                <p>
+                    <strong>Estimated Diameter:</strong> 
+                    <%= Math.round(neo.estimated_diameter.meters.estimated_diameter_min).toLocaleString() %> - 
+                    <%= Math.round(neo.estimated_diameter.meters.estimated_diameter_max).toLocaleString() %> meters
+                </p>
+                <p>
+                    <strong>Miss Distance:</strong> 
+                    <%= Math.round(neo.close_approach_data[0].miss_distance.kilometers).toLocaleString() %> km
+                </p>
+                <p>
+                    <strong>Potentially Hazardous:</strong> 
+                    <%= neo.is_potentially_hazardous_asteroid ? 'Yes' : 'No' %>
+                </p>
+            </div>
+        <% }) %>
+    </div>
+</body>
+</html>

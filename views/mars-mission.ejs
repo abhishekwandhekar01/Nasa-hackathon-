@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Mission</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+        img { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 20px; }
+        .choices label { display: block; margin: 10px 0; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <h1>Mission: Identify the Camera</h1>
+    <p>Study the image below, taken by the Curiosity Rover on Mars. Can you identify which camera captured this shot?</p>
+
+    <img src="<%= missionPhoto.img_src %>" alt="Mission photo from Mars">
+
+    <form action="/submit-mission" method="POST">
+        <div class="choices">
+            <% choices.forEach(choice => { %>
+                <label>
+                    <input type="radio" name="userAnswer" value="<%= choice %>" required>
+                    <%= choice %>
+                </label>
+            <% }) %>
+        </div>
+        
+        <input type="hidden" name="correctAnswer" value="<%= correctAnswer %>">
+        <button type="submit" style="margin-top: 20px; padding: 10px 20px;">Submit Intel</button>
+    </form>
+
+    <p style="margin-top: 20px;"><a href="/dashboard">Return to Dashboard</a></p>
+
+</body>
+</html> 
