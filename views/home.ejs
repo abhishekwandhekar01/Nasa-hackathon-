@@ -1,37 +1,40 @@
 <%- include('partials/header', { user: user }) %>
 
-<div class="container">
-    <div class="text-center mb-5">
-        <h1 class="display-5">Welcome, <%= user ? user.username : 'Explorer' %>!</h1>
-        <p class="lead dashboard-subtitle">Select a mission or explore the cosmos.</p>
-        <div class="cta-group mt-3">
-            <a href="/missions" class="btn btn-lg btn-danger me-3">Start Mission</a>
-            <a href="/solar-system" class="btn btn-lg btn-outline-light">Explore Planets</a>
+<main>
+  <section class="hero-section text-center py-5" style="background:#0b1120; color:white; min-height:90vh; display:flex; flex-direction:column; justify-content:center;">
+    <div class="container">
+      <nav class="d-flex justify-content-between align-items-center mb-4">
+        <div></div>
+        <div class="user-hero-info text-end">
+          <% if (user) { %>
+            <span class="badge-level me-2" style="background:#111827; padding:6px 12px; border-radius:8px;">Lv <%= user.level || '1' %></span>
+            <span class="badge-xp" style="background:#1e293b; padding:6px 12px; border-radius:8px;"><%= (user.xp || 0).toLocaleString() %> XP</span>
+          <% } %>
         </div>
-        <div class="underline-animated mt-3"></div>
-    </div>
+      </nav>
 
-    <!-- Features Grid -->
-    <section class="features-grid">
-        <div class="feature-card">
-            <div class="feature-icon"><i class="fas fa-question-circle"></i></div>
-            <h3 class="feature-title">Daily Quiz</h3>
-            <p class="feature-description">Test your knowledge with today's Astronomy Picture of the Day.</p>
-            <a href="/daily-quiz" class="btn btn-primary mt-3">Start Quiz</a>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon"><i class="fab fa-wpexplorer"></i></div>
-            <h3 class="feature-title">Mars Mission</h3>
-            <p class="feature-description">Identify photos from the Curiosity rover on the red planet.</p>
-            <a href="/missions" class="btn btn-danger mt-3">Start Mission</a>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon"><i class="fas fa-meteor"></i></div>
-            <h3 class="feature-title">NEO Hazard</h3>
-            <p class="feature-description">Analyze asteroid data to find the closest approach.</p>
-            <a href="/neo-mission" class="btn btn-warning mt-3">Start Assessment</a>
-        </div>
-    </section>
-</div>
+      <h1 class="hero-title fw-bold mb-3" style="font-size:3rem;">
+        Space Learning <span style="background: linear-gradient(90deg, #4f46e5, #9333ea); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Universe</span>
+      </h1>
+      
+      <p class="hero-subtitle mx-auto" style="max-width:750px; font-size:1.1rem; color:#cbd5e1;">
+        We're not just making a quiz app. We're building an immersive space learning experience where students can explore planets in AR, solve space missions with real NASA data, and compete globally.
+      </p>
+
+      <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+        <a href="/ar" class="btn btn-info px-4 py-2 fw-semibold" style="border-radius:10px; background:#0ea5e9; border:none;">AR/VR Ready</a>
+        <a href="#" class="btn px-4 py-2 fw-semibold" style="border-radius:10px; background:#8b5cf6; border:none;">AI-Powered</a>
+        <a href="/daily-quiz" class="btn btn-primary px-4 py-2 fw-semibold" style="border-radius:10px;">Start Quiz</a>
+        <a href="/neo-mission" class="btn btn-warning px-4 py-2 fw-semibold" style="border-radius:10px;">Start Assessment</a>
+      </div>
+
+      <div class="mt-5">
+        <a href="/missions" class="btn px-5 py-3 fw-bold" style="background:#2563eb; border:none; color:white; border-radius:12px;">
+          <i class="fas fa-rocket me-2"></i> Start Your Space Journey
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
 
 <%- include('partials/footer') %>

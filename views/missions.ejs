@@ -1,32 +1,65 @@
 <%- include('partials/header', { user: user }) %>
 
-<div class="container">
-    <div class="text-center mb-5">
-        <h1 class="display-5">Mission Control</h1>
-        <p class="lead text-muted">Select a mission to test your knowledge and earn XP.</p>
+<div class="missions-hero" style="padding:56px 0; text-align:center; background: linear-gradient(180deg,#2b1340,#071022); color: #fff;">
+    <div class="container">
+        <h1 style="font-size:2.4rem; font-weight:700; margin-bottom:6px;">Space Exploration Missions</h1>
+        <p style="opacity:0.9; max-width:880px; margin:0 auto;">Explore curated missions, test your knowledge, and earn XP as you progress.</p>
     </div>
+</div>
+
+<div class="container" style="margin-top:28px; margin-bottom:48px;">
 
     <section class="missions-grid">
         <% missions.forEach(m => { %>
             <div class="feature-card mission-card" data-id="<%= m.id %>" data-name="<%= m.name %>" data-agency="<%= m.agency %>" data-launch="<%= m.launchDate %>" data-image="<%= m.image %>" data-summary="<%= (m.summary||'').replace(/"/g,'&quot;') %>" data-funfact="<%= (m.funFact||'').replace(/"/g,'&quot;') %>">
                 <div class="mission-thumb"><img src="<%= m.image %>" alt="<%= m.name %>"></div>
-                <h3 class="feature-title mt-2"><%= m.name %></h3>
-                <p class="mission-meta small mb-0"><strong><%= m.agency %></strong></p>
-                <p class="mission-meta small mb-2"><em><%= m.launchDate %></em></p>
-                <div class="mission-actions">
-                    <button class="btn btn-outline-light open-mission">Open</button>
+                <div class="mission-card-body" style="width:100%;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                        <h3 class="feature-title mb-0"><%= m.name %></h3>
+                        <span class="badge badge-pill" style="background:#fbbf24; color:#071228; padding:6px 10px; border-radius:12px; font-weight:700;"> <%= m.difficulty || 'Medium' %> </span>
+                    </div>
+
+                    <p class="mission-meta" style="opacity:0.9; margin-top:8px;"><%= m.summary %></p>
+
+                    <div class="mission-progress" style="margin:12px 0;">
+                        <div style="display:flex; justify-content:space-between; color:#9fe0ff; font-weight:600;"><span>Progress</span><span><%= (m.progress||0) %>%</span></div>
+                        <div style="background:rgba(255,255,255,0.04); height:10px; border-radius:8px; margin-top:8px; overflow:hidden;">
+                            <div style="height:100%; background:linear-gradient(90deg,#0ea5e9,#2563eb); width:<%= (m.progress||0) %>%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="mission-rewards" style="margin-bottom:12px;">
+                        <% (m.rewards||[]).forEach(r => { %>
+                            <span class="reward-pill" style="display:inline-block; margin-right:8px; padding:6px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02);"> <%= r %> </span>
+                        <% }) %>
+                    </div>
+
+                    <div style="margin-top:8px;">
+                        <% var isApollo = (m.name || '').toLowerCase().includes('apollo'); %>
+                        <% if (isApollo) { %>
+                            <a href="https://www.nasa.gov/mission/apollo-11/" class="btn cta-button" target="_blank" rel="noopener">Start Mission</a>
+                        <% } else if (m.progress && m.progress > 0 && m.progress < 100) { %>
+                            <a href="/missions/<%= m.id %>" class="btn cta-button">Continue Mission</a>
+                        <% } else if (m.progress >= 100) { %>
+                            <a href="/missions/<%= m.id %>" class="btn btn-success">Mission Complete</a>
+                        <% } else { %>
+                            <a href="/missions/<%= m.id %>" class="btn cta-button">View Mission</a>
+                        <% } %>
+                    </div>
                 </div>
-                <!-- Inline quiz container (will be populated by JS) -->
-                <div class="mission-quiz-inline mt-3"></div>
+
                 <!-- store full details for overlay -->
                 <div class="d-none mission-full-data">
                     <div class="summary"><%= m.summary %></div>
                     <ul class="achievements">
-                        <% m.achievements.forEach(a => { %>
+                        <% (m.achievements||[]).forEach(a => { %>
                             <li><%= a %></li>
                         <% }) %>
                     </ul>
                 </div>
+
+                <!-- inline quiz container (populated by JS) -->
+                <div class="mission-quiz-inline mt-3"></div>
             </div>
         <% }) %>
     </section>
@@ -39,15 +72,8 @@
                 <p class="mission-meta" id="mission-meta"></p>
                 <div id="mission-summary" class="mission-summary"></div>
                 <div id="mission-achievements"></div>
-                <hr style="border-color: rgba(255,255,255,0.06); margin-top:18px;">
-                <p id="mission-funfact" class="text-muted small"></p>
-                <div class="d-flex justify-content-end mt-3">
-                    <button id="mission-start-test" class="btn btn-lg btn-primary">Start Test</button>
-                </div>
             </div>
         </div>
-
-              <!-- Inline quizzes injected per-card (no modal) -->
 
         <script src="/js/missions.js"></script>
 </div>
