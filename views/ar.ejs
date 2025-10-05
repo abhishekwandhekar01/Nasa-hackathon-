@@ -12,26 +12,27 @@
     - Place a GLB at /public/models/mars.glb and a USDZ at /public/models/mars.usdz for iOS Quick Look.
     - model-viewer will use WebXR where available, Scene Viewer on Android, and Quick Look on iOS.
   -->
-  <model-viewer id="mv" src="/models/mars.glb" ios-src="/models/mars.usdz"
-                alt="Mars model"
-                ar
-                ar-modes="webxr scene-viewer quick-look"
-                interaction-prompt="auto"
-                shadow-intensity="1"
-                environment-image="neutral"
-                camera-controls
-                poster="/img/earth.png"
-                style="width:100%; height:640px; background: transparent; border-radius:12px;">
-    <button slot="ar-button" class="cta-button">View in your space</button>
-  </model-viewer>
+  <div class="ar-panel">
+    <model-viewer id="mv" class="ar-model" src="/models/mars.glb" ios-src="/models/mars.usdz"
+                  alt="Mars model"
+                  ar
+                  ar-modes="webxr scene-viewer quick-look"
+                  interaction-prompt="auto"
+                  shadow-intensity="1"
+                  environment-image="neutral"
+                  camera-controls
+                  poster="/img/mars.png">
+      <button slot="ar-button" class="cta-button">View in your space</button>
+    </model-viewer>
 
-  <div id="ar-info" class="mt-3">
-    <p id="ar-status">Detecting AR support...</p>
-    <div id="ar-links" style="display:none">
-      <a id="scene-viewer-link" class="btn btn-outline-light me-2" target="_blank">Open in Scene Viewer (Android)</a>
-      <a id="quick-look-link" class="btn btn-outline-light" target="_blank">Open in Quick Look (iOS)</a>
+    <div id="ar-info" class="mt-3" style="width:100%;max-width:820px;">
+      <p id="ar-status">Detecting AR support...</p>
+      <div id="ar-links" style="display:none">
+        <a id="scene-viewer-link" class="btn btn-outline-light me-2" target="_blank">Open in Scene Viewer (Android)</a>
+        <a id="quick-look-link" class="btn btn-outline-light" target="_blank">Open in Quick Look (iOS)</a>
+      </div>
+      <p class="mt-2 ar-caption">If your device doesn't support AR, you can still rotate and inspect the 3D model above. Use the button to place Mars in your space.</p>
     </div>
-    <p class="mt-2">If your device doesn't support AR, you can still rotate and inspect the 3D model above.</p>
   </div>
 
   <script>

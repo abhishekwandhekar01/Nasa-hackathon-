@@ -1,62 +1,37 @@
-<%- include('partials/header', { user: (typeof user === 'undefined' ? null : user), active: 'home' }) %>
+<%- include('partials/header', { user: user }) %>
 
-<!-- Hero Section -->
-<section class="hero-section">
-    <div class="container">
-        <h1 class="hero-title">
-            Space Learning <span class="highlight">Universe</span>
-        </h1>
-        <p class="hero-subtitle">
-            We're not just making a quiz app. We're building an immersive space learning experience where students can explore planets in AR, solve space missions with real NASA data, and compete globally.
-        </p>
-        
-        <div class="feature-badges">
-            <span class="feature-badge badge-ar">AR/VR Ready</span>
-            <span class="feature-badge badge-nasa">Live NASA Data</span>
-            <span class="feature-badge badge-ai">AI-Powered</span>
-            <span class="feature-badge badge-competition">Global Competition</span>
+<div class="container">
+    <div class="text-center mb-5">
+        <h1 class="display-5">Welcome, <%= user ? user.username : 'Explorer' %>!</h1>
+        <p class="lead dashboard-subtitle">Select a mission or explore the cosmos.</p>
+        <div class="cta-group mt-3">
+            <a href="/missions" class="btn btn-lg btn-danger me-3">Start Mission</a>
+            <a href="/solar-system" class="btn btn-lg btn-outline-light">Explore Planets</a>
         </div>
-
-        <a href="/auth/register" class="cta-button">
-            <i class="fas fa-rocket"></i>
-            Start Your Space Journey
-        </a>
-    </div>
-</section>
-
-<!-- Features Grid -->
-<section class="features-grid">
-    <div class="feature-card">
-        <div class="feature-icon icon-cyan">
-            <i class="fas fa-camera"></i>
-        </div>
-        <h3 class="feature-title">AR/VR Experience</h3>
-        <p class="feature-description">Explore planets and satellites in 3D augmented reality</p>
+        <div class="underline-animated mt-3"></div>
     </div>
 
-    <div class="feature-card">
-        <div class="feature-icon icon-green">
-            <i class="fas fa-satellite"></i>
+    <!-- Features Grid -->
+    <section class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-question-circle"></i></div>
+            <h3 class="feature-title">Daily Quiz</h3>
+            <p class="feature-description">Test your knowledge with today's Astronomy Picture of the Day.</p>
+            <a href="/daily-quiz" class="btn btn-primary mt-3">Start Quiz</a>
         </div>
-        <h3 class="feature-title">Live NASA Data</h3>
-        <p class="feature-description">Real-time space data for dynamic learning experiences</p>
-    </div>
-
-    <div class="feature-card">
-        <div class="feature-icon icon-purple">
-            <i class="fas fa-cog"></i>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fab fa-wpexplorer"></i></div>
+            <h3 class="feature-title">Mars Mission</h3>
+            <p class="feature-description">Identify photos from the Curiosity rover on the red planet.</p>
+            <a href="/missions" class="btn btn-danger mt-3">Start Mission</a>
         </div>
-        <h3 class="feature-title">Interactive Simulations</h3>
-        <p class="feature-description">Build solar systems and learn orbital mechanics</p>
-    </div>
-
-    <div class="feature-card">
-        <div class="feature-icon icon-yellow">
-            <i class="fas fa-trophy"></i>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-meteor"></i></div>
+            <h3 class="feature-title">NEO Hazard</h3>
+            <p class="feature-description">Analyze asteroid data to find the closest approach.</p>
+            <a href="/neo-mission" class="btn btn-warning mt-3">Start Assessment</a>
         </div>
-        <h3 class="feature-title">Global Competition</h3>
-        <p class="feature-description">Compete with space explorers worldwide</p>
-    </div>
-</section>
+    </section>
+</div>
 
 <%- include('partials/footer') %>

@@ -6,45 +6,41 @@
         <p class="lead text-muted">Select a mission to test your knowledge and earn XP.</p>
     </div>
 
-    <section class="features-grid">
+    <section class="missions-grid">
         <% missions.forEach(m => { %>
-            <div class="feature-card">
-                <img src="<%= m.image %>" alt="<%= m.name %>" class="img-fluid rounded mb-3">
-                <h3 class="feature-title"><%= m.name %></h3>
-                <p class="mission-meta small mb-1"><strong>Agency:</strong> <%= m.agency %> • <strong>Launch:</strong> <%= m.launchDate %></p>
-                <p class="feature-description"><%= m.summary %></p>
-                <p><strong>Achievements:</strong></p>
-                <ul>
-                    <% m.achievements.forEach(a => { %>
-                        <li><%= a %></li>
-                    <% }) %>
-                </ul>
-                <p class="mission-funfact small"><strong>Fun Fact:</strong> <%= m.funFact %></p>
-                <a href="#" class="btn btn-outline-light mt-3">Explore Mission</a>
-            </div>
-        <% }) %>
-    </section>
-        <section class="missions-grid">
-            <% missions.forEach(m => { %>
-                <div class="feature-card mission-card">
-                    <img src="<%= m.image %>" alt="<%= m.name %>">
-                    <h3 class="feature-title mt-3"><%= m.name %></h3>
-                    <p class="mission-meta small mb-2"><strong>Agency:</strong> <%= m.agency %> • <strong>Launch:</strong> <%= m.launchDate %></p>
-                    <p class="feature-description"><%= m.summary %></p>
-                    <p><strong>Achievements:</strong></p>
-                    <ul>
+            <div class="feature-card mission-card" data-id="<%= m.id %>" data-name="<%= m.name %>" data-agency="<%= m.agency %>" data-launch="<%= m.launchDate %>" data-image="<%= m.image %>" data-summary="<%= (m.summary||'').replace(/"/g,'&quot;') %>" data-funfact="<%= (m.funFact||'').replace(/"/g,'&quot;') %>">
+                <div class="mission-thumb"><img src="<%= m.image %>" alt="<%= m.name %>"></div>
+                <h3 class="feature-title mt-2"><%= m.name %></h3>
+                <p class="mission-meta small mb-0"><strong><%= m.agency %></strong></p>
+                <p class="mission-meta small mb-2"><em><%= m.launchDate %></em></p>
+                <div class="mission-actions">
+                    <button class="btn btn-outline-light open-mission">Open</button>
+                </div>
+                <!-- store full details for overlay -->
+                <div class="d-none mission-full-data">
+                    <div class="summary"><%= m.summary %></div>
+                    <ul class="achievements">
                         <% m.achievements.forEach(a => { %>
                             <li><%= a %></li>
                         <% }) %>
                     </ul>
-                    <p class="mission-funfact small"><strong>Fun Fact:</strong> <%= m.funFact %></p>
-                    <div class="mission-actions">
-                        <a href="#" class="btn btn-outline-light">Explore</a>
-                        <a href="/missions/<%= m.id %>" class="btn btn-primary">Details</a>
-                    </div>
                 </div>
-            <% }) %>
-        </section>
+            </div>
+        <% }) %>
+    </section>
+        <!-- overlay container for animated mission detail (re-added) -->
+        <div id="mission-overlay" class="mission-overlay" aria-hidden="true">
+            <div class="mission-detail" id="mission-detail">
+                <button id="mission-close" class="btn btn-sm btn-outline-light" style="position:absolute; right:12px; top:12px">Close</button>
+                <div class="mission-large-thumb"><img id="mission-image" src=""/></div>
+                <h2 id="mission-title"></h2>
+                <p class="mission-meta" id="mission-meta"></p>
+                <div id="mission-summary" class="mission-summary"></div>
+                <div id="mission-achievements"></div>
+            </div>
+        </div>
+
+        <script src="/js/missions.js"></script>
 </div>
 
 <%- include('partials/footer') %>

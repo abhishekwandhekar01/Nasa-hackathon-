@@ -3,7 +3,12 @@
 <div class="container">
     <div class="text-center mb-5">
         <h1 class="display-5">Welcome, <%= user.username %>!</h1>
-        <p class="lead text-muted">Select a mission or explore the cosmos.</p>
+    <p class="lead dashboard-subtitle">Select a mission or explore the cosmos.</p>
+        <div class="cta-group mt-3">
+            <a href="/missions" class="btn btn-lg btn-danger me-3">Start Mission</a>
+            <a href="/solar-system" class="btn btn-lg btn-outline-light">Explore Planets</a>
+        </div>
+        <div class="underline-animated mt-3"></div>
     </div>
 
     <!-- Features Grid -->
@@ -18,7 +23,7 @@
             <div class="feature-icon"><i class="fab fa-wpexplorer"></i></div>
             <h3 class="feature-title">Mars Mission</h3>
             <p class="feature-description">Identify photos from the Curiosity rover on the red planet.</p>
-            <a href="/mars-mission" class="btn btn-danger mt-3">Start Mission</a>
+            <a href="/missions" class="btn btn-danger mt-3">Start Mission</a>
         </div>
         <div class="feature-card">
             <div class="feature-icon"><i class="fas fa-meteor"></i></div>

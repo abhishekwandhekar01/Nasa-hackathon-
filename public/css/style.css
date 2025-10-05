@@ -68,6 +68,15 @@ body {
     margin: 20px auto;
 }
 
+.missions-subtitle {
+    color: #9fe0ff; /* brighter cyan to stand out on dark background */
+    font-weight: 500;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+}
+
+/* Dashboard subtitle variant */
+.dashboard-subtitle { color: #bfe8ff; }
+
 .feature-badges {
     margin: 30px 0;
 }
@@ -105,6 +114,43 @@ body {
     padding: 50px 0;
 }
 
+.features-grid.centered { align-items: start; justify-items: center; }
+
+/* Home-specific grid */
+.home-grid { grid-template-columns: repeat(3, 1fr); gap: 28px; align-items: start; }
+.feature-primary { display:flex; gap:18px; align-items:center; padding:18px; }
+.feature-primary .feature-media img { width:180px; height:120px; object-fit:cover; border-radius:8px; }
+.feature-primary .feature-body { flex:1; }
+.feature-actions { margin-top:10px; display:flex; gap:10px; }
+.feature-actions .btn { padding:10px 14px; border-radius:8px; }
+
+/* Make cards visually consistent */
+.feature-card { background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent); padding: 22px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.04); }
+.feature-card .feature-icon { width:56px; height:56px; display:flex; align-items:center; justify-content:center; border-radius:10px; font-size:1.3rem; margin-bottom:10px; }
+.feature-card .feature-title { margin-top:6px; margin-bottom:8px; font-size:1.15rem; }
+.feature-card .feature-description { color: var(--text-muted); margin-bottom:12px; }
+
+@media (max-width: 1100px) {
+    .home-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 700px) {
+    .home-grid { grid-template-columns: 1fr; }
+    .feature-primary { flex-direction: column; align-items:stretch; }
+    .feature-primary .feature-media img { width:100%; height:180px; }
+}
+
+/* Dashboard CTA group */
+.cta-group .btn { padding: 12px 18px; font-size: 1.05rem; }
+.underline-animated { width: 160px; height: 4px; margin: 0 auto; background: linear-gradient(90deg, rgba(159,224,255,0.6), rgba(122,61,255,0.6)); border-radius: 2px; animation: underlinePulse 2.5s infinite; box-shadow: 0 6px 18px rgba(0,0,0,0.5); }
+@keyframes underlinePulse { 0% { transform: translateY(0) scaleX(1); opacity: 0.6 } 50% { transform: translateY(-4px) scaleX(1.15); opacity: 1 } 100% { transform: translateY(0) scaleX(1); opacity: 0.6 } }
+
+/* Home quick actions */
+.quick-actions { display:flex; gap:12px; align-items:center; }
+.quick-actions .btn { padding: 10px 16px; border-radius: 10px; font-weight:600; }
+@media (max-width: 640px) {
+    .quick-actions { flex-direction:column; align-items:stretch; }
+}
+
 .feature-card {
     background-color: var(--card-bg);
     padding: 30px;
@@ -113,6 +159,73 @@ body {
     border: 1px solid transparent;
     transition: transform 0.3s ease, border-color 0.3s ease;
 }
+
+/* Missions card grid */
+.missions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+.mission-card { position: relative; padding: 16px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; cursor:pointer; overflow:hidden; }
+.mission-thumb img { width: 100%; height: 140px; object-fit:cover; border-radius:8px; }
+.mission-content { width:100%; }
+.mission-card .mission-open { position:absolute; right:12px; top:12px; z-index:5; }
+
+/* Overlay detail */
+.mission-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(4,6,15,0.6); z-index:9999; padding: 20px; }
+.mission-overlay.visible { display:flex; }
+.mission-detail { max-width:1000px; width:100%; background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent); padding: 18px; border-radius:12px; transform: translateY(20px) scale(0.98); opacity:0; transition: transform 250ms cubic-bezier(.2,.9,.2,1), opacity 200ms ease; }
+.mission-detail.entered { transform: translateY(0) scale(1); opacity:1; }
+.mission-large-thumb img { width:100%; height:290px; object-fit:cover; border-radius:8px; }
+.anim-clone { transition: transform 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease; border-radius:12px; overflow:hidden; }
+.mission-overlay.visible .mission-detail { transform: translateY(0) scale(1); opacity:1; }
+.mission-summary { margin-top: 12px; color: #e6f6ff; }
+.mission-achievements { margin-top: 12px; color: #cfe8ff; }
+.clone-overlay {
+    position: fixed;
+    border-radius: 12px;
+    /* make the expanded card visually solid to avoid underlying text bleeding through */
+    background: linear-gradient(180deg, #071826 0%, #021018 100%);
+    color: #e9f7ff;
+    z-index: 10000;
+    overflow: auto;
+    box-shadow: 0 40px 120px rgba(2,6,23,0.9);
+    border: 1px solid rgba(255,255,255,0.03);
+    /* ensure the clone is opaque and doesn't let page content show through */
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+.clone-overlay .mission-large-thumb { overflow: hidden; border-radius: 8px; height: 320px; background: #000; }
+.clone-overlay .mission-large-thumb img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; }
+.clone-overlay .clone-inner { padding-bottom: 40px; }
+.clone-overlay h2 { margin-top: 12px; margin-bottom: 6px; }
+.clone-overlay .mission-meta { color: #cfe8ff; margin-bottom: 10px; }
+.clone-overlay .clone-inner { opacity: 1; transform: none; }
+.clone-overlay .clone-inner { transition: opacity 260ms ease, transform 260ms cubic-bezier(.2,.9,.2,1); }
+
+.clone-overlay .clone-close { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgba(255,255,255,0.06); }
+.clone-overlay .mission-summary { color: #e6f6ff; line-height:1.55; margin-top:10px; }
+.clone-overlay .mission-achievements { color: #dbeafe; margin-top:12px; }
+
+/* Header overlay on top of the image for a polished look */
+.clone-overlay .header-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0));
+    color: #fff;
+    z-index: 3;
+}
+.clone-overlay .header-bar h2 { margin: 0; font-size: 1.25rem; font-weight:700; text-shadow: 0 6px 18px rgba(0,0,0,0.6); }
+.clone-overlay .content-panel {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    padding: 18px;
+    margin-top: 12px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+.clone-overlay .clone-close { width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; }
 
 .feature-card .knowledge-paragraph {
     color: #cfe8ff; /* light cyan for visibility on dark bg */
@@ -267,11 +380,101 @@ input, textarea, select {
 .solar-canvas { min-height: 480px; position: relative; background: radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 50%); }
 .solar-canvas .sun { position: absolute; width:120px; height:120px; left:calc(50% - 60px); top:calc(50% - 60px); background: radial-gradient(circle, #ffd27a, #ff8a00); border-radius:50%; box-shadow: 0 0 30px rgba(255,140,0,0.3); }
 .orbits { position: absolute; inset:0; pointer-events:none; }
-.orbit-ring { position: absolute; border-radius:50%; border:1px dashed rgba(255,255,255,0.06); pointer-events:none; }
-.planet-on-orbit { position: absolute; pointer-events:auto; transform: translate(-50%, -50%); }
-.overlay-help { position: absolute; bottom: 8px; left: 12px; color: var(--text-muted); font-size: 0.9rem; }
+.orbit-ring { position: absolute; border-radius:50%; border:1px solid rgba(255,255,255,0.06); pointer-events:none; box-shadow: 0 4px 18px rgba(0,0,0,0.45), inset 0 0 18px rgba(255,255,255,0.02); }
+.orbit-ring.highlighted { border-style:solid; border-color: rgba(255,200,100,0.9); box-shadow: 0 6px 18px rgba(255,140,0,0.08); }
+.planet-on-orbit { position: absolute; pointer-events:auto; will-change: left, top, transform; }
+.overlay-help {
+    display: block;
+    color: #e6f6ff;
+    font-size: 1rem;
+    text-align: center;
+    max-width: 900px;
+    margin: 12px auto 0 auto;
+}
+
+/* AR page styles */
+.ar-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 0 36px 0;
+}
+.ar-model {
+    width: 100%;
+    max-width: 820px;
+    height: 520px; /* reduced height for better balance */
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 18px 60px rgba(2,10,20,0.6);
+    border: 1px solid rgba(255,255,255,0.04);
+    background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.06));
+}
+.ar-caption {
+    color: #cfe8ff;
+    max-width: 820px;
+    text-align: center;
+    font-size: 0.98rem;
+}
+
+@media (max-width: 820px) {
+    .ar-model { height: 420px; }
+}
+
+
+.solar-canvas .overlay-help {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #e6f6ff; /* brighter for legibility */
+    font-size: 1rem;
+    background: rgba(2,6,23,0.6);
+    padding: 8px 12px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    pointer-events: none; /* don't block drag/drop */
+    max-width: calc(100% - 48px);
+    text-align: center;
+    z-index: 20;
+}
 .palette-item { cursor: grab; background: rgba(255,255,255,0.02); padding:8px; border-radius:8px; display:flex; align-items:center; }
 .palette-item:active { cursor:grabbing; }
 .drag-over { outline: 2px dashed rgba(255,255,255,0.08); }
 
 .planet-info-box { position: fixed; z-index: 9999; background: rgba(10,12,20,0.95); color: var(--text-light); padding: 10px 12px; border-radius:8px; box-shadow: 0 6px 18px rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.2s ease; }
+.planet-info-box .btn { font-size: 12px; padding:6px 8px; }
+
+/* Orbit controls */
+.orbit-controls { align-items: center; color: var(--text-muted); }
+.orbit-controls input[type=range] { width: 180px; }
+
+/* Planet handle visuals */
+.planet-on-orbit img { border: 2px solid rgba(255,255,255,0.04); box-shadow: 0 6px 18px rgba(0,0,0,0.6); cursor: grab; }
+.planet-on-orbit[data-dragging="1"] img { cursor: grabbing; transform: scale(1.05); }
+
+@media (max-width: 768px) {
+    .orbit-controls { flex-direction: column; align-items: stretch; gap: 8px; }
+    .orbit-controls input[type=range] { width: 100%; }
+}
+
+/* AR / model-viewer styles */
+.ar-wrapper { display:flex; flex-direction:column; gap:12px; align-items:flex-start; }
+.mv-responsive { width: 100%; max-width: 920px; height: 560px; border-radius: 12px; background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent); overflow: hidden; box-shadow: 0 12px 30px rgba(2,6,23,0.6); }
+.mv-responsive[poster] { background-size: cover; background-position: center center; }
+.mv-responsive::part(poster) { object-fit: contain; }
+.ar-controls { display:flex; gap:8px; align-items:center; }
+.mv-compact { height: 320px !important; max-width: 640px !important; }
+.mv-fit-poster { background-size: contain !important; background-position: center center !important; }
+
+@media (max-width: 992px) {
+    .mv-responsive { height: 480px; }
+}
+@media (max-width: 600px) {
+    .mv-responsive { height: 320px; }
+    .ar-controls { width:100%; justify-content: space-between; }
+}
+
+/* small accessibility and caption tweaks */
+.ar-wrapper .small { color: var(--text-muted); }
+.mv-sr-caption { display:block; font-size:0.9rem; color:var(--text-muted); margin-top:6px; }

@@ -40,7 +40,14 @@ const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes);
 
 app.get('/', (req, res) => {
-    res.render('home');
+    // 1. Get the user object from the request (standard with Passport.js or custom auth)
+    //    If no user is logged in, this will be null or undefined.
+    const currentUser = req.user || null; 
+    
+    // 2. Pass the 'user' variable to the template
+    res.render('home', { 
+        user: currentUser 
+    }); 
 });
 
 // UPDATED DASHBOARD ROUTE
