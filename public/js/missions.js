@@ -137,13 +137,70 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="mission-summary">${summaryHtml || '<em>No summary available.</em>'}</div>
           ${achievementsHtml ? `<div class="mission-achievements"><h4>Achievements</h4>${achievementsHtml}</div>` : ''}
+          <div><button class="take-test-cta">Take Test</button></div>
         </div>
       </div>
     `;
 
     // hook up close handler for the clone
     clone.querySelector('.clone-close').addEventListener('click', () => closeCloneOverlay(clone));
+    // hook up take-test CTA to scroll to original card and highlight inline quiz
+    const cta = clone.querySelector('.take-test-cta');
+    if (cta) {
+      cta.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        // find original card and its inline quiz
+        const orig = originalCard || card;
+        if (!orig) return;
+        const quiz = orig.querySelector('.mission-quiz-inline');
+        if (quiz) {
+          // close clone overlay and smooth-scroll to the original card
+          closeCloneOverlay(clone);
+          setTimeout(() => {
+            orig.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            quiz.classList.add('highlight-flash');
+            setTimeout(() => quiz.classList.remove('highlight-flash'), 1600);
+          }, 320);
+        }
+      });
+    }
+    // populate the fun fact if present (into the clone overlay summary area)
+    try {
+      const funfact = card.dataset.funfact || (card.querySelector('.mission-full-data .funfact') ? card.querySelector('.mission-full-data .funfact').textContent : '');
+      const funFactEl = clone.querySelector('.mission-funfact') || clone.querySelector('.clone-inner');
+      if (funFactEl && funfact) {
+        // append a small funfact paragraph
+        const pf = document.createElement('p');
+        pf.className = 'mission-funfact text-muted small';
+        pf.textContent = funfact;
+        const contentPanel = clone.querySelector('.content-panel') || clone.querySelector('.clone-inner');
+        if (contentPanel) contentPanel.appendChild(pf);
+      }
+    } catch (e) { console.warn('populate funfact failed', e); }
 
+
+  function buildQuizForCard(card) {
+    const name = card.dataset.name || '';
+    const agency = card.dataset.agency || '';
+    const launch = card.dataset.launch || '';
+    const hiddenAchNode = card.querySelector('.mission-full-data .achievements');
+    const options = hiddenAchNode ? Array.from(hiddenAchNode.querySelectorAll('li')).map(li=>li.textContent) : ['Collected samples','First to land','Mapped rings'];
+    const q1 = { id: 'q1', prompt: `What agency ran the ${name} mission?`, type: 'text' };
+    const q2 = { id: 'q2', prompt: `When was ${name} launched? (year)`, type: 'text' };
+    const q3 = { id: 'q3', prompt: `Which of these was an achievement of ${name}?`, type: 'radio', options };
+    const questions = [q1,q2,q3];
+    let html = `<form class="mission-quiz-modal-form">`;
+    questions.forEach(q=>{
+      if (q.type === 'text') html += `<div class="mb-2"><label>${q.prompt}</label><input class="form-control" name="${q.id}" /></div>`;
+      else if (q.type === 'radio') {
+        html += `<div class="mb-2"><label>${q.prompt}</label>`;
+        q.options.forEach((opt, idx) => html += `<div class="form-check"><input class="form-check-input" type="radio" name="${q.id}" id="${q.id}-${idx}" value="${opt}"><label class="form-check-label" for="${q.id}-${idx}">${opt}</label></div>`);
+        html += `</div>`;
+      }
+    });
+    html += `</form>`;
+    return { html, questions };
+  }
     // fade in the inner content for a smooth morph effect
     const inner = clone.querySelector('.clone-inner');
     if (inner) {
@@ -195,6 +252,41 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentClone) { currentClone.remove(); currentClone = null; }
       openMissionCard(card);
     });
+  });
+
+  // Instead of modal: inject an inline quiz at the bottom of each mission card
+  document.querySelectorAll('.mission-card').forEach(card => {
+    try {
+      const quizContainer = card.querySelector('.mission-quiz-inline');
+      if (!quizContainer) return;
+      const qb = buildQuizForCard(card);
+      // build inline form HTML with a submit button and a result area
+      const form = document.createElement('form');
+      form.className = 'mission-quiz-inline-form';
+      form.innerHTML = qb.html + `<div class="d-flex align-items-center gap-2 mt-2"><button class="btn btn-success btn-sm" type="submit">Submit</button><div class="quiz-result text-light small" style="margin-left:8px"></div></div>`;
+      quizContainer.appendChild(form);
+      form.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const fd = new FormData(form);
+        const payload = { missionId: card.dataset.id, answers: {} };
+        for (const e of form.elements) {
+          if (!e.name) continue;
+          payload.answers[e.name] = fd.get(e.name) || '';
+        }
+        const resultEl = form.querySelector('.quiz-result');
+        try {
+          const resp = await fetch('/submit-mission-quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          const j = await resp.json();
+          if (resp.ok) {
+            resultEl.innerHTML = `Score: <strong>${j.score}/${j.total}</strong> — ${j.message || 'Recorded'}`;
+          } else {
+            resultEl.innerText = `Error: ${j.error || 'Failed'}`;
+          }
+        } catch (e) {
+          resultEl.innerText = 'Network error';
+        }
+      });
+    } catch (e) { console.warn('inline quiz injection failed', e); }
   });
 
   closeBtn.addEventListener('click', () => {

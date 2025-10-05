@@ -16,6 +16,8 @@
                 <div class="mission-actions">
                     <button class="btn btn-outline-light open-mission">Open</button>
                 </div>
+                <!-- Inline quiz container (will be populated by JS) -->
+                <div class="mission-quiz-inline mt-3"></div>
                 <!-- store full details for overlay -->
                 <div class="d-none mission-full-data">
                     <div class="summary"><%= m.summary %></div>
@@ -37,8 +39,15 @@
                 <p class="mission-meta" id="mission-meta"></p>
                 <div id="mission-summary" class="mission-summary"></div>
                 <div id="mission-achievements"></div>
+                <hr style="border-color: rgba(255,255,255,0.06); margin-top:18px;">
+                <p id="mission-funfact" class="text-muted small"></p>
+                <div class="d-flex justify-content-end mt-3">
+                    <button id="mission-start-test" class="btn btn-lg btn-primary">Start Test</button>
+                </div>
             </div>
         </div>
+
+              <!-- Inline quizzes injected per-card (no modal) -->
 
         <script src="/js/missions.js"></script>
 </div>

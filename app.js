@@ -1,6 +1,13 @@
 // app.js (Complete updated version)
 
 require('dotenv').config();
+// Quick sanity check for the chat API key (do NOT log the key itself)
+if (typeof process !== 'undefined') {
+    try {
+        // Print presence state only to help debugging — do not expose the secret
+        console.log('Chat API key configured:', !!process.env.GEMINI_API_KEY);
+    } catch (e) { /* ignore logging errors */ }
+}
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
@@ -20,6 +27,7 @@ mongoose.connect(process.env.MONGO_URI)
 // --- Middlewares ---
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.set('view engine', 'ejs');
 
 // --- Session Configuration ---
@@ -185,8 +193,16 @@ app.get('/mars-rover', async (req, res) => {
     }
     try {
         const user = await User.findById(req.session.userId); // Add this
-const response = await axios.get(/* ... */);
-res.render('mars-rover', { user: user, photos: response.data.latest_photos }); // Add user here
+        let photos = null;
+        if (process.env.NASA_API_KEY) {
+            try {
+                const response = await axios.get(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${process.env.NASA_API_KEY}`);
+                photos = response.data.latest_photos;
+            } catch (e) {
+                console.warn('Could not fetch Mars rover photos:', e.message);
+            }
+        }
+        res.render('mars-rover', { user: user, photos }); // Add user here
 
     } catch (error) {
         console.error("Error fetching Mars rover photos:", error);
@@ -268,19 +284,14 @@ app.get('/neo', async (req, res) => {
         res.send("Could not fetch Near-Earth Object data.");
     }
 });
-
 // app.js (add these two new routes)
-
-// NEW ROUTE TO SET UP AND SHOW THE NEO MISSION
 app.get('/neo-mission', async (req, res) => {
-    if (!req.session.userId) {
-        return res.redirect('/auth/login');
-    }
+    if (!req.session.userId) return res.redirect('/auth/login');
     try {
-        const user = await User.findById(req.session.userId); 
+        const user = await User.findById(req.session.userId);
         const today = new Date().toISOString().split('T')[0];
         const response = await axios.get(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=${process.env.NASA_API_KEY}`);
-        const neos = response.data.near_earth_objects[today];
+        const neos = (response.data && response.data.near_earth_objects && response.data.near_earth_objects[today]) || [];
 
         if (neos.length < 3) {
             return res.send("Not enough NEO data for a mission today. Please check back tomorrow!");
@@ -438,9 +449,6 @@ app.get('/nasa/mars-photos', async (req, res) => {
         res.render('nasa-mars', { user, marsPhotos });
     } catch (e) { res.sendStatus(500); }
 });
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
 
 // AR demo page
 app.get('/ar', async (req, res) => {
@@ -465,4 +473,252 @@ app.post('/solar-builder/save', express.json(), async (req, res) => {
         req.session.customSystem = req.body.system || [];
         res.json({ ok: true });
     } catch (e) { console.error(e); res.status(500).json({ ok: false }); }
+});
+
+// Chat proxy route for Gemini / Generative Language API
+// app.js (replace the old /api/chat route with this)
+
+// app.js (replace your old /api/chat route with this one)
+
+// app.js (Verified /api/chat route)
+
+// app.js (replace the old /api/chat route with this robust version)
+
+// app.js (replace your /api/chat route with this new one for Cosmos)
+
+app.post('/api/chat', async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Authentication required. Please log in again.' });
+    }
+    const userMessage = (req.body.message || '').toString().trim();
+    if (!userMessage) return res.status(400).json({ error: 'No message provided.' });
+
+    // Prefer Hugging Face as the primary provider
+    const triedProviders = [];
+    const hfToken = process.env.HF_API_TOKEN;
+    const hfModel = process.env.HF_FALLBACK_MODEL || 'microsoft/DialoGPT-medium';
+
+    // Per-session custom system prompt and canned responses
+    const customSystemPrompt = req.session && req.session.customSystemPrompt ? req.session.customSystemPrompt : null;
+    const canned = req.session && Array.isArray(req.session.cannedResponses) ? req.session.cannedResponses : [];
+
+    // Check canned responses first (exact match or substring)
+    try {
+        for (const c of canned) {
+            if (!c || !c.trigger) continue;
+            const trig = String(c.trigger).trim().toLowerCase();
+            if (!trig) continue;
+            const msg = String(userMessage).toLowerCase();
+            if (msg === trig || msg.includes(trig)) {
+                return res.json({ reply: c.response, provider: 'local-canned', cannedId: c.id });
+            }
+        }
+    } catch (e) {
+        console.warn('Canned response check error:', e && e.message);
+    }
+
+    if (hfToken) {
+        try {
+            const hfInput = customSystemPrompt ? `${customSystemPrompt}\nUser: ${userMessage}` : userMessage;
+            const hfResp = await axios.post(`https://api-inference.huggingface.co/models/${hfModel}`, { inputs: hfInput }, { headers: { 'Authorization': `Bearer ${hfToken}` }, timeout: 20000 });
+            // Try to extract different response shapes
+            let hfReply = null;
+            if (hfResp && hfResp.data) {
+                if (Array.isArray(hfResp.data) && hfResp.data[0]) {
+                    if (typeof hfResp.data[0] === 'string') hfReply = hfResp.data[0];
+                    else if (hfResp.data[0].generated_text) hfReply = hfResp.data[0].generated_text;
+                } else if (typeof hfResp.data.generated_text === 'string') hfReply = hfResp.data.generated_text;
+                else if (typeof hfResp.data === 'string') hfReply = hfResp.data;
+            }
+            if (hfReply) return res.json({ reply: hfReply, provider: 'huggingface' });
+            // Record that HF returned but with unexpected shape
+            triedProviders.push({ provider: 'huggingface', ok: false, reason: 'unexpected_shape', raw: hfResp && hfResp.data });
+            console.warn('HF returned unexpected shape:', hfResp && hfResp.data);
+        } catch (hfErr) {
+            // Record HF error and continue to Cosmos fallback
+            const hfRemote = hfErr && hfErr.response && hfErr.response.data;
+            triedProviders.push({ provider: 'huggingface', ok: false, reason: 'request_failed', status: hfErr && hfErr.response && hfErr.response.status, raw: hfRemote || hfErr.message });
+            console.warn('Hugging Face call failed:', hfErr && (hfErr.response ? hfErr.response.data : hfErr.message));
+            // If HF returned 404 (model not found), attempt a small list of fallback models automatically
+            const status = hfErr && hfErr.response && hfErr.response.status;
+            if (status === 404) {
+                const fallbackModels = ['gpt2', 'distilgpt2', 'facebook/blenderbot-400M-distill'];
+                for (const fm of fallbackModels) {
+                    try {
+                        const fr = await axios.post(`https://api-inference.huggingface.co/models/${fm}`, { inputs: userMessage }, { headers: { Authorization: `Bearer ${hfToken}` }, timeout: 20000 });
+                        // extract text similarly
+                        let fmReply = null;
+                        if (fr && fr.data) {
+                            if (Array.isArray(fr.data) && fr.data[0]) {
+                                if (typeof fr.data[0] === 'string') fmReply = fr.data[0];
+                                else if (fr.data[0].generated_text) fmReply = fr.data[0].generated_text;
+                            } else if (typeof fr.data.generated_text === 'string') fmReply = fr.data.generated_text;
+                            else if (typeof fr.data === 'string') fmReply = fr.data;
+                        }
+                        triedProviders.push({ provider: 'huggingface', model: fm, ok: !!fmReply, status: fr.status, raw: fr.data });
+                        if (fmReply) return res.json({ reply: fmReply, provider: 'huggingface', model: fm });
+                    } catch (fe) {
+                        const raw = fe && fe.response && fe.response.data || fe.message;
+                        triedProviders.push({ provider: 'huggingface', model: fm, ok: false, status: fe && fe.response && fe.response.status, raw });
+                        console.warn(`HF fallback model ${fm} failed:`, raw);
+                    }
+                }
+            }
+        }
+    } else {
+        triedProviders.push({ provider: 'huggingface', ok: false, reason: 'not_configured' });
+    }
+
+    // If HF not configured or failed to produce usable reply, try Cosmos/DeepSeek if configured
+    const dsKey = process.env.Cosmos_API_KEY || process.env.DEEPSEEK_API_KEY;
+    const dsProviderName = process.env.Cosmos_API_KEY ? 'Cosmos' : (process.env.DEEPSEEK_API_KEY ? 'DeepSeek' : null);
+    if (!dsKey) {
+        // No secondary provider configured — return the triedProviders detail for debugging
+        return res.status(502).json({ error: 'No AI providers available. Configure HF_API_TOKEN or Cosmos_API_KEY/DEEPSEEK_API_KEY.', triedProviders });
+    }
+
+    try {
+        // Use the appropriate upstream depending on which key is present
+        const apiUrl = process.env.Cosmos_API_KEY ? 'https://api.Cosmos.com/chat/completions' : 'https://api.deepseek.com/chat/completions';
+        const payload = {
+            model: process.env.Cosmos_API_KEY ? 'Cosmos-chat' : 'deepseek-chat',
+            messages: [
+                { role: 'system', content: customSystemPrompt || 'You are a helpful NASA space exploration expert named Cosmo. Answer questions about planets, missions, stars, and space technology. Be friendly and keep answers concise.' },
+                { role: 'user', content: userMessage }
+            ]
+        };
+        const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${dsKey}` };
+        const response = await axios.post(apiUrl, payload, { headers, timeout: 20000 });
+        let reply = null;
+        const data = response && response.data;
+        try {
+            if (data) {
+                if (data.choices && Array.isArray(data.choices) && data.choices[0]) {
+                    const c = data.choices[0];
+                    if (c.message && typeof c.message.content === 'string') reply = c.message.content;
+                    else if (c.message && c.message.content && typeof c.message.content === 'object' && c.message.content.text) reply = c.message.content.text;
+                    else if (c.text) reply = c.text;
+                    else if (typeof c === 'string') reply = c;
+                } else if (typeof data.reply === 'string') {
+                    reply = data.reply;
+                } else if (Array.isArray(data) && data[0] && typeof data[0].generated_text === 'string') {
+                    reply = data[0].generated_text;
+                }
+            }
+        } catch (parseErr) {
+            console.warn('Cosmos response parse error:', parseErr && parseErr.toString());
+        }
+        if (reply) return res.json({ reply, provider: dsProviderName || 'secondary' });
+        throw { __Cosmos_unexpected__: true, data };
+    } catch (error) {
+        const remote = error && error.response && error.response.data;
+        const isInsufficient = (error && error.response && error.response.status === 402) || (remote && (remote.error && /insufficient/i.test(String(remote.error.message || remote.error))));
+        if (isInsufficient) {
+            triedProviders.push({ provider: dsProviderName || 'secondary', ok: false, reason: 'insufficient_balance', remote });
+            return res.status(402).json({
+                error: `${dsProviderName || 'Secondary provider'} reported insufficient balance.`,
+                code: `${dsProviderName || 'secondary'}_insufficient_balance`,
+                remediation: `Refill your ${dsProviderName || 'secondary'} balance or configure HF_API_TOKEN in .env to use Hugging Face as a primary provider.`,
+                triedProviders
+            });
+        }
+        if (error && error.__Cosmos_unexpected__) {
+            triedProviders.push({ provider: dsProviderName || 'secondary', ok: false, reason: 'unexpected_shape', raw: error.data });
+            console.error(`${dsProviderName || 'Secondary provider'} returned unexpected response shape:`, error.data);
+            return res.status(502).json({ error: `${dsProviderName || 'Secondary provider'} returned an unexpected response format. Check server logs.`, triedProviders });
+        }
+        triedProviders.push({ provider: dsProviderName || 'secondary', ok: false, reason: 'request_failed', raw: remote || (error && error.message) });
+        console.error(`${dsProviderName || 'Secondary provider'} API Error:`, remote || (error && error.message));
+        return res.status(500).json({ error: 'Failed to get a response from the AI assistant. Check server logs.', triedProviders });
+    }
+});
+// Start the server after all routes are defined
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+// Provider status endpoint for quick diagnostics
+app.get('/api/chat/provider-status', async (req, res) => {
+    // Check Hugging Face first
+    const hfToken = process.env.HF_API_TOKEN;
+    if (hfToken) {
+        try {
+            const hfModel = process.env.HF_FALLBACK_MODEL || 'microsoft/DialoGPT-medium';
+            const r = await axios.post(`https://api-inference.huggingface.co/models/${hfModel}`, { inputs: 'ping' }, { headers: { Authorization: `Bearer ${hfToken}` }, timeout: 10000 });
+            return res.json({ huggingface: { configured: true, reachable: true, status: r.status } });
+        } catch (e) {
+            const status = e.response ? e.response.status : null;
+            const body = e.response ? e.response.data : e.message;
+            return res.json({ huggingface: { configured: true, reachable: !!e.response, status, body } });
+        }
+    }
+
+    // If HF not configured, check Cosmos
+    const dsKey = process.env.Cosmos_API_KEY;
+    if (!dsKey) return res.json({ Cosmos: { configured: false } });
+    try {
+        const resp = await axios.post('https://api.Cosmos.com/chat/completions', {
+            model: 'Cosmos-chat',
+            messages: [ { role: 'system', content: 'healthcheck' }, { role: 'user', content: 'ping' } ]
+        }, { headers: { Authorization: `Bearer ${dsKey}` }, timeout: 10000 });
+        return res.json({ Cosmos: { configured: true, reachable: true, status: resp.status } });
+    } catch (e) {
+        const status = e.response ? e.response.status : null;
+        const body = e.response ? e.response.data : e.message;
+        return res.json({ Cosmos: { configured: true, reachable: !!e.response, status, body } });
+    }
+});
+
+// Local-only HF test endpoint for debug (no auth) - only accessible from localhost
+app.post('/api/chat/test-hf', async (req, res) => {
+    const ip = req.ip || req.connection && (req.connection.remoteAddress || req.socket && req.socket.remoteAddress);
+    // Normalize typical localhost representations
+    if (!ip || !(ip === '::1' || ip === '127.0.0.1' || ip.endsWith('127.0.0.1') || ip === '::ffff:127.0.0.1')) {
+        return res.status(403).json({ error: 'Forbidden - this test endpoint is localhost only.' });
+    }
+    const hfToken = process.env.HF_API_TOKEN;
+    if (!hfToken) return res.status(400).json({ error: 'HF_API_TOKEN not configured.' });
+    const model = process.env.HF_FALLBACK_MODEL || 'microsoft/DialoGPT-medium';
+    const input = (req.body && req.body.inputs) || 'Hello from local test';
+    try {
+        const r = await axios.post(`https://api-inference.huggingface.co/models/${model}`, { inputs: input }, { headers: { Authorization: `Bearer ${hfToken}` }, timeout: 20000 });
+        return res.json({ ok: true, status: r.status, data: r.data });
+    } catch (e) {
+        return res.status(502).json({ ok: false, status: e.response && e.response.status, body: e.response && e.response.data || e.message });
+    }
+});
+
+// Endpoint to grade mission quizzes
+app.post('/submit-mission-quiz', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Authentication required.' });
+    try {
+        const { missionId, answers } = req.body || {};
+        if (!missionId || !answers) return res.status(400).json({ error: 'Invalid payload.' });
+        const missions = require('./data/missions');
+        const mission = missions.find(m => m.id === missionId);
+        if (!mission) return res.status(404).json({ error: 'Mission not found.' });
+
+        // Build expected answers
+        const expected = {
+            q1: mission.agency,
+            q2: (mission.launchDate || '').split('-')[0],
+            q3: (mission.achievements && mission.achievements[0]) || ''
+        };
+
+        let score = 0, total = 3;
+        // q1: agency
+        if ((answers.q1 || '').toString().trim().toLowerCase() === String(expected.q1 || '').toLowerCase()) score++;
+        // q2: year
+        if ((answers.q2 || '').toString().trim() === String(expected.q2 || '')) score++;
+        // q3: achievement option
+        if ((answers.q3 || '').toString().trim() === String(expected.q3 || '').trim()) score++;
+
+        // Award XP: 10 XP per correct
+        if (score > 0) await addXP(req.session.userId, score * 10);
+
+        return res.json({ ok: true, score, total, message: `You earned ${score * 10} XP.` });
+    } catch (e) {
+        console.error('Error grading mission quiz:', e);
+        return res.status(500).json({ error: 'Server error grading quiz.' });
+    }
 });
