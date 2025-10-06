@@ -29,3 +29,10 @@ Notes & suggestions
 - Consider removing `bcrypt` if not used; this project uses `bcryptjs`.
 - Secure cookies and set cookie options for production.
 - Add input validation and rate-limiting on auth routes.
+
+
+Video : https://www.youtube.com/watch?v=3BY9CQHaNmk
+
+Contact
+- Email: abhishekwandhekar4@gmail.com
+- Linkedn : https://www.linkedin.com/in/abhishek-wandhekar-302172293
